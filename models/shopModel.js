@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
-const addressSchema = require('./addressSchema');
+const Schema = mongoose.Schema;
+const addressSchema = require('./subdocuments/addressSchema');
+const flavorSchema = require('./subdocuments/flavorSchema');
 
-const shopSchema = mongoose.Schema({
+const shopSchema = new Schema({
 	name: {
 		type: String,
 		required: true,
@@ -10,20 +12,18 @@ const shopSchema = mongoose.Schema({
 		type: addressSchema,
 		required: true,
 	},
-	flavors: [{ type: String, unique: false }],
-	openHours: [
-		[
-			{
-				type: String,
-				require: true,
-			},
-		],
-	],
 	ownerId: {
-		type: String,
-		require: true,
+		type: mongoose.ObjectId,
+		required: true,
 	},
+	flavors: [flavorSchema],
+	active: {
+		type: Boolean, 
+		default: true
+	},
+	creatorId: {
+		type: mongoose.ObjectId
+	}
 });
 
-const shopModel = mongoose.model('Shop', shopSchema);
-module.exports = shopModel;
+module.exports = mongoose.model('Shop', shopSchema);
