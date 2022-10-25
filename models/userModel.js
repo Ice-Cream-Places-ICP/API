@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const shopEmployeeSchema = require('./subdocuments/shopEmployeeSchema');
 
 const userSchema = mongoose.Schema({
 	email: {
@@ -11,11 +12,14 @@ const userSchema = mongoose.Schema({
 		required: true,
 		minlength: 5,
 	},
+	associatedShops: {
+		type: [shopEmployeeSchema]
+	}, 
 	type: {
 		type: String,
 		required: false,
 		default: 'default',
-	},
+	}
 });
 
 userSchema.pre('save', async function () {
