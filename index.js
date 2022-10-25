@@ -1,9 +1,9 @@
-require("dotenv").config({path: "./config.env"})
+require("dotenv").config();
 const express = require("express");
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
-const authentication = require("./authentication/authentication")
-const cors = require("cors")
+const authentication = require("./authentication/authentication");
+const cors = require("cors");
 const app = express();
 
 //MIDDLEWARE
