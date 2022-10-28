@@ -1,25 +1,25 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-const shopEmployeeSchema = require('./subdocuments/shopEmployeeSchema');
 
 const userSchema = mongoose.Schema({
 	email: {
 		type: String,
 		required: true,
+		unique: true
 	},
 	password: {
 		type: String,
 		required: true,
 		minlength: 5,
 	},
-	associatedShops: {
-		type: [shopEmployeeSchema]
-	}, 
 	type: {
 		type: String,
-		required: false,
 		default: 'default',
+		enum: ['default', 'admin']
 	}
+},
+{
+	timestamps: true
 });
 
 userSchema.pre('save', async function () {
@@ -36,5 +36,4 @@ userSchema.pre('save', async function () {
 	}
 });
 
-const userModel = mongoose.model('User', userSchema);
-module.exports = userModel;
+module.exports = mongoose.model('User', userSchema);

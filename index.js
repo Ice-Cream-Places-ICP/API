@@ -1,15 +1,18 @@
 require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
 const mongoose = require("mongoose");
 
 const authentication = require("./authentication/authentication");
-const cors = require("cors");
+const shopRoutes = require('./routes/shop');
+
 const app = express();
 
 //MIDDLEWARE
 app.use(express.json());
 app.use(cors());
 app.use("/auth", authentication);
+app.use('/shops', shopRoutes);
 
 //sample get endpoint
 app.get("/sample", (req, res) => {

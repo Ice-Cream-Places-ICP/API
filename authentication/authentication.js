@@ -1,10 +1,11 @@
 const router = require('express').Router();
-const User = require('../models/userModel.js');
+const User = require('../models/User.js');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const sendResponse = require('../utils/sendResponse.js');
 
 router.post('/register', async (req, res) => {
+	// TODO: add validator for email and password
 	console.log('----------------------------------------------');
 	console.log('REGISTER ORDER');
 
