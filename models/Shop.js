@@ -12,18 +12,24 @@ const shopSchema = new Schema({
 		type: addressSchema,
 		required: true,
 	},
-	ownerId: {
-		type: mongoose.ObjectId,
-		required: true,
-	},
-	flavors: [flavorSchema],
+	flavors: [{
+		type: flavorSchema
+	}],
 	active: {
 		type: Boolean, 
 		default: true
 	},
+	ownerId: {
+		type: Schema.Types.ObjectId,
+		ref: 'User',
+	},
 	creatorId: {
-		type: mongoose.ObjectId
+		type: Schema.Types.ObjectId,
+		ref: 'User'
 	}
+}, 
+{
+	timestamps: true
 });
 
 module.exports = mongoose.model('Shop', shopSchema);

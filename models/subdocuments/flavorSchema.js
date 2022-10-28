@@ -4,7 +4,8 @@ const Schema = mongoose.Schema;
 const flavorSchema = new Schema({
     name: {
         type: String, 
-        required: true
+        unique: true,
+        required: true,
     },
     available: {
         type: Boolean,
