@@ -1,9 +1,17 @@
 const mongoose = require('mongoose');
 const Shop = require('../models/Shop');
+const User = require('../models/User');
 const sendResponse = require('../utils/sendResponse');
 
 const getShops = async (req, res) => {
-    const shops = await Shop.find();
+    const shops = await Shop.find()
+    .populate('owner')
+    .populate('creator')
+    .exec();
+
+    if (!shops?.length) {
+        return res.status(200).json(sendResponse(true, 'No shops found'));
+    }
 
     res.status(200).json(sendResponse(true, 'Shops retrieved', shops));
 }
@@ -12,14 +20,18 @@ const getShop = async (req, res) => {
     const _id = req.params.id;
 
     if (!mongoose.isValidObjectId(_id)) {
-        return res.status(400).json(sendResponse(false, 'No such shop'))
+        return res.status(400).json(sendResponse(false, 'Invalid id'))
     }
 
-    const shop = await Shop.findById({ _id });
+    const shop = await Shop.findById({ _id })
+    .populate('owner')
+    .populate('creator')
+    .exec();
+
     if (!shop) {
         return res.status(400).json(sendResponse(false, 'No such shop'))
     }
-    res.status(200).json(sendResponse(true, 'Shop retrieved', shop ));
+    res.status(200).json(sendResponse(true, 'Shop retrieved', shop));
 }
 
 const createShop = async (req, res) => {
@@ -28,9 +40,43 @@ const createShop = async (req, res) => {
         address,
         flavors,
         active,
-        ownerId,
-        creatorId
+        owner,
+        creator
     } = req.body;
+
+    if (!mongoose.isValidObjectId(owner)) {
+        return res.status(400).json(sendResponse(false, 'Invalid owner id'));
+    }
+
+    const foundOwner = await User.findById(owner).lean().exec();
+    if (!foundOwner) {
+        return res.status(400).json(sendResponse(false, 'Owner does not exist'))
+    }
+
+    if (!mongoose.isValidObjectId(creator)) {
+        return res.status(400).json(sendResponse(false, 'Invalid creator id'));
+    }
+
+    const foundCreator = await User.findById(creator).lean().exec();
+    if (!foundCreator) {
+        return res.status(400).json(sendResponse(false, 'Creator does not exist'))
+    }
+
+    if (!name || !address.country || !address.city || !address.postCode ||
+        !address.streetName || !address.streetNumber || !owner || !creator) {
+        return res.status(400).json(sendResponse(false, 'All fields required'));
+    }
+
+    const duplicate = await Shop.findOne({  
+        name, 'address.country': address.country, 'address.city': address.city, 
+        'address.postCode': address.postCode, 'address.streetName': address.streetName,
+        'address.streetNumber': address.streetNumber })
+        .lean()
+        .exec();
+
+    if (duplicate) {
+        return res.status(400).json(sendResponse(false, 'Shop already exists'));
+    }
 
     try {
         const shop = await Shop.create({
@@ -38,10 +84,10 @@ const createShop = async (req, res) => {
             address,
             flavors,
             active,
-            ownerId,
-            creatorId
+            owner,
+            creator
         });
-        res.status(200).json(sendResponse(true, 'Shop created', shop));
+        res.status(200).json(sendResponse(true, `Shop '${shop.name}' created`, shop));
     } catch (err) {
         res.status(400).json(sendResponse(false, err.message));
     }
@@ -49,17 +95,51 @@ const createShop = async (req, res) => {
 
 const updateShop = async (req, res) => {
     const _id = req.params.id;
+    if (!mongoose.isValidObjectId(_id)) {
+        return res.status(400).json(sendResponse(false, 'Invalid id'));
+    }
+
     const {
         name,
         address,
         flavors,
         active,
-        ownerId,
-        creatorId
+        owner,
+        creator
     } = req.body;
 
-    if (!mongoose.isValidObjectId(_id)) {
-        return res.status(400).json(sendResponse(false, 'No such shop'));
+    if (!name || !address.country || !address.city || !address.postCode ||
+        !address.streetName || !address.streetNumber || !owner || !creator) {
+        return res.status(400).json(sendResponse(false, 'All fields required'));
+    }
+
+    if (!mongoose.isValidObjectId(owner)) {
+        return res.status(400).json(sendResponse(false, 'Invalid owner id'));
+    }
+
+    const foundOwner = await User.findById(owner).lean().exec();
+    if (!foundOwner) {
+        return res.status(400).json(false, 'Owner does not exist')
+    }
+
+    if (!mongoose.isValidObjectId(creator)) {
+        return res.status(400).json(sendResponse(false, 'Invalid creator id'));
+    }
+
+    const foundCreator = await User.findById(creator).lean().exec();
+    if (!foundCreator) {
+        return res.status(400).json(false, 'Creator does not exist')
+    }
+
+    const duplicate = await Shop.findOne({  
+        name, 'address.country': address.country, 'address.city': address.city, 
+        'address.postCode': address.postCode, 'address.streetName': address.streetName,
+        'address.streetNumber': address.streetNumber })
+        .lean()
+        .exec();
+
+    if (duplicate) {
+        return res.status(400).json(sendResponse(false, 'Shop already exists'));
     }
 
     try {
@@ -68,26 +148,30 @@ const updateShop = async (req, res) => {
         shop.address = address;
         shop.flavors = flavors;
         shop.active = active;
-        shop.ownerId = ownerId;
-        shop.creatorId = creatorId;
+        shop.owner = owner;
+        shop.creator = creator;
 
         const result = await shop.save();
-        res.status(200).json(sendResponse(true, 'Shop updated', result));
+        res.status(200).json(sendResponse(true, `Shop '${shop.name}' updated`, result));
     } catch (err) {
         res.status(400).json(sendResponse(false, err.message));
     }
 }
 
 const deleteShop = async (req, res) => {
-const _id = req.params.id;
-
-    if (!mongoose.isValidObjectId(_id)) {
-        return res.status(400).json(sendResponse(false, 'No such shop'));
+    const id = req.params.id;
+    if (!mongoose.isValidObjectId(id)) {
+        return res.status(400).json(sendResponse(false, 'Invalid id'));
     }
-    
+
+    const shop = await Shop.findById(id);
+    if (!shop) {
+        return res.status(400).json(sendResponse(false, 'No such shop'))
+    }
+
     try {
-        const shop = await Shop.findByIdAndDelete({ _id });
-        res.status(200).json(sendResponse(true, 'Shop deleted'));
+        const result = await shop.delete();
+        res.status(200).json(sendResponse(true, `Shop '${result.name}' deleted`));
     } catch (err) {
         res.status(400).json(sendResponse(false, err.message));
     }
@@ -96,7 +180,7 @@ const _id = req.params.id;
 module.exports = {
     getShops,
     getShop,
-    createShop, 
-    updateShop, 
+    createShop,
+    updateShop,
     deleteShop
 }

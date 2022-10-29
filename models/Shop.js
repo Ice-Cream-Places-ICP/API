@@ -19,11 +19,11 @@ const shopSchema = new Schema({
 		type: Boolean, 
 		default: true
 	},
-	ownerId: {
+	owner: {
 		type: Schema.Types.ObjectId,
 		ref: 'User',
 	},
-	creatorId: {
+	creator: {
 		type: Schema.Types.ObjectId,
 		ref: 'User'
 	}
