@@ -19,10 +19,6 @@ const shopSchema = new Schema({
 		type: Boolean, 
 		default: true
 	},
-	owner: {
-		type: Schema.Types.ObjectId,
-		ref: 'User',
-	},
 	creator: {
 		type: Schema.Types.ObjectId,
 		ref: 'User'
