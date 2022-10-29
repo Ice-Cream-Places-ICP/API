@@ -5,21 +5,21 @@ const sendResponse = require('../utils/sendResponse');
 const getShops = async (req, res) => {
     const shops = await Shop.find();
 
-    sendResponse(res, 200, 'Shops retrieved', shops);
+    res.status(200).json(sendResponse(true, 'Shops retrieved', shops));
 }
 
 const getShop = async (req, res) => {
     const _id = req.params.id;
 
     if (!mongoose.isValidObjectId(_id)) {
-        return sendResponse(res, 404, 'No such shop');
+        return res.status(400).json(sendResponse(false, 'No such shop'))
     }
 
     const shop = await Shop.findById({ _id });
     if (!shop) {
-        return sendResponse(res, 404, 'No such shop');
+        return res.status(400).json(sendResponse(false, 'No such shop'))
     }
-    sendResponse(res, 200, 'Shop retrieved', shop)
+    res.status(200).json(sendResponse(true, 'Shop retrieved', shop ));
 }
 
 const createShop = async (req, res) => {
@@ -41,9 +41,9 @@ const createShop = async (req, res) => {
             ownerId,
             creatorId
         });
-        sendResponse(res, 200, 'Shop created', shop);
+        res.status(200).json(sendResponse(true, 'Shop created', shop));
     } catch (err) {
-        sendResponse(res, 400, err.message);
+        res.status(400).json(sendResponse(false, err.message));
     }
 }
 
@@ -59,7 +59,7 @@ const updateShop = async (req, res) => {
     } = req.body;
 
     if (!mongoose.isValidObjectId(_id)) {
-        return sendResponse(res, 404, 'No such shop');
+        return res.status(400).json(sendResponse(false, 'No such shop'));
     }
 
     try {
@@ -72,9 +72,9 @@ const updateShop = async (req, res) => {
         shop.creatorId = creatorId;
 
         const result = await shop.save();
-        sendResponse(res, 200, 'Shop updated', result);
+        res.status(200).json(sendResponse(true, 'Shop updated', result));
     } catch (err) {
-        sendResponse(res, 400, err.message);
+        res.status(400).json(sendResponse(false, err.message));
     }
 }
 
@@ -82,14 +82,14 @@ const deleteShop = async (req, res) => {
 const _id = req.params.id;
 
     if (!mongoose.isValidObjectId(_id)) {
-        return sendResponse(res, 404, 'No such shop');
+        return res.status(400).json(sendResponse(false, 'No such shop'));
     }
     
     try {
         const shop = await Shop.findByIdAndDelete({ _id });
-        sendResponse(res, 200, 'Shop deleted');
+        res.status(200).json(sendResponse(true, 'Shop deleted'));
     } catch (err) {
-        sendResponse(res, 400, err.message);
+        res.status(400).json(sendResponse(false, err.message));
     }
 }
 
