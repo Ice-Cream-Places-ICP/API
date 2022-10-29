@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 const Shop = require('../models/Shop');
 const User = require('../models/User');
+const Employee = require('../models/Employee');
 const sendResponse = require('../utils/sendResponse');
 
 const getShops = async (req, res) => {
     const shops = await Shop.find()
-    .populate('owner')
     .populate('creator')
     .exec();
 
@@ -24,7 +24,6 @@ const getShop = async (req, res) => {
     }
 
     const shop = await Shop.findById({ _id })
-    .populate('owner')
     .populate('creator')
     .exec();
 
@@ -35,23 +34,13 @@ const getShop = async (req, res) => {
 }
 
 const createShop = async (req, res) => {
-    const {
+    let {
         name,
         address,
         flavors,
         active,
-        owner,
         creator
     } = req.body;
-
-    if (!mongoose.isValidObjectId(owner)) {
-        return res.status(400).json(sendResponse(false, 'Invalid owner id'));
-    }
-
-    const foundOwner = await User.findById(owner).lean().exec();
-    if (!foundOwner) {
-        return res.status(400).json(sendResponse(false, 'Owner does not exist'))
-    }
 
     if (!mongoose.isValidObjectId(creator)) {
         return res.status(400).json(sendResponse(false, 'Invalid creator id'));
@@ -63,7 +52,7 @@ const createShop = async (req, res) => {
     }
 
     if (!name || !address.country || !address.city || !address.postCode ||
-        !address.streetName || !address.streetNumber || !owner || !creator) {
+        !address.streetName || !address.streetNumber || !creator) {
         return res.status(400).json(sendResponse(false, 'All fields required'));
     }
 
@@ -79,14 +68,25 @@ const createShop = async (req, res) => {
     }
 
     try {
+        if (foundCreator.type !== 'admin') {
+            active = false;
+        }
+
         const shop = await Shop.create({
             name,
             address,
             flavors,
             active,
-            owner,
             creator
         });
+
+        if (foundCreator.type !== 'admin') {
+            await Employee.create({
+                user: creator,
+                shop: shop._id,
+                role: 'owner'
+            })
+        }
         res.status(200).json(sendResponse(true, `Shop '${shop.name}' created`, shop));
     } catch (err) {
         res.status(400).json(sendResponse(false, err.message));
@@ -99,27 +99,22 @@ const updateShop = async (req, res) => {
         return res.status(400).json(sendResponse(false, 'Invalid id'));
     }
 
+    let shop = await Shop.findById({ _id });
+    if (!shop) {
+        return res.status(400).json(sendResponse(false, 'Shop not found'));
+    }
+
     const {
         name,
         address,
         flavors,
         active,
-        owner,
         creator
     } = req.body;
 
     if (!name || !address.country || !address.city || !address.postCode ||
-        !address.streetName || !address.streetNumber || !owner || !creator) {
+        !address.streetName || !address.streetNumber || !creator) {
         return res.status(400).json(sendResponse(false, 'All fields required'));
-    }
-
-    if (!mongoose.isValidObjectId(owner)) {
-        return res.status(400).json(sendResponse(false, 'Invalid owner id'));
-    }
-
-    const foundOwner = await User.findById(owner).lean().exec();
-    if (!foundOwner) {
-        return res.status(400).json(false, 'Owner does not exist')
     }
 
     if (!mongoose.isValidObjectId(creator)) {
@@ -143,13 +138,16 @@ const updateShop = async (req, res) => {
     }
 
     try {
-        let shop = await Shop.findById({ _id });
+        if (foundCreator.type !== 'admin' && shop.creator !== creator) {
+            return res.status(400).json(sendResponse(false, 'User cannot change creator'));
+        } else {
+            shop.creator = creator;
+        }
+
         shop.name = name;
         shop.address = address;
         shop.flavors = flavors;
         shop.active = active;
-        shop.owner = owner;
-        shop.creator = creator;
 
         const result = await shop.save();
         res.status(200).json(sendResponse(true, `Shop '${shop.name}' updated`, result));
