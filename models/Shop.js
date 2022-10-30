@@ -15,9 +15,8 @@ const shopSchema = new Schema({
 	flavors: [{
 		type: flavorSchema
 	}],
-	active: {
-		type: Boolean, 
-		default: true
+	removedAt: {
+		type: Date
 	},
 	creator: {
 		type: Schema.Types.ObjectId,
