@@ -53,11 +53,18 @@ router.post('/login', async (req, res) => {
 			throw 'Wrong password';
 		}
 
-		const token = await jwt.sign(user._id.toString(), process.env.TOKEN_SECRET);
+		const token = await jwt.sign(
+			{
+				"user": {
+					"id": user._id.toString()
+				}
+			},
+			process.env.TOKEN_SECRET
+		);
 
 		console.log('Login Successfully');
 		res.header('token', token);
-		res.status(200).json(sendResponse(true, 'Login Successfully'));
+		res.status(200).json(sendResponse(true, 'Login Successfully', { accessToken: token }));
 	} catch (e) {
 		res.json(sendResponse(false, e));
 	}
