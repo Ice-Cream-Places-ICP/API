@@ -3,6 +3,7 @@ const Shop = require('../models/Shop');
 const User = require('../models/User');
 const Employee = require('../models/Employee');
 const sendResponse = require('../utils/sendResponse');
+const openingHoursOverflow = require('../utils/openingHoursOverflow');
 const shopDto = require('../DTOs/shopDto');
 
 const getShops = async (req, res) => {
@@ -41,12 +42,17 @@ const createShop = async (req, res) => {
     let {
         name,
         address,
+        openingHours,
         flavors,
     } = req.body;
 
     if (!name || !address.country || !address.city || !address.postCode ||
         !address.streetName || !address.streetNumber) {
         return res.status(400).json(sendResponse(false, 'All fields required'));
+    }
+
+    if (openingHoursOverflow) {
+        return res.status(400).json(sendResponse(false, 'Too many opening hours specified'));
     }
 
     const duplicate = await Shop.findOne({
@@ -67,6 +73,7 @@ const createShop = async (req, res) => {
         let shopObject = {
             name,
             address,
+            openingHours,
             flavors,
             creator
         };
@@ -113,6 +120,7 @@ const updateShop = async (req, res) => {
     const {
         name,
         address,
+        openingHours,
         flavors,
         creator
     } = req.body;
@@ -120,6 +128,10 @@ const updateShop = async (req, res) => {
     if (!name || !address.country || !address.city || !address.postCode ||
         !address.streetName || !address.streetNumber) {
         return res.status(400).json(sendResponse(false, 'All fields required'));
+    }
+
+    if (openingHoursOverflow) {
+        return res.status(400).json(sendResponse(false, 'Too many opening hours specified'));
     }
 
     if (creator && !mongoose.isValidObjectId(creator)) {
@@ -148,6 +160,7 @@ const updateShop = async (req, res) => {
 
         shop.name = name;
         shop.address = address;
+        shop.openingHours = openingHours;
         shop.flavors = flavors;
 
         let result = await shop.save();

@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const addressSchema = require('./subdocuments/addressSchema');
 const flavorSchema = require('./subdocuments/flavorSchema');
+const openingHoursSchema = require('./subdocuments/openingHours');
 
 const shopSchema = new Schema({
 	name: {
@@ -12,6 +13,9 @@ const shopSchema = new Schema({
 		type: addressSchema,
 		required: true,
 	},
+	openingHours: [{
+		type: openingHoursSchema
+	}],
 	flavors: [{
 		type: flavorSchema
 	}],
