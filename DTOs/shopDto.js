@@ -3,6 +3,7 @@ let shopDto = (shop) => {
         _id: shop._id,
         name: shop.name,
         address: shop.address,
+        openingHours: shop.openingHours,
         flavors: shop.flavors,
     }
 }
