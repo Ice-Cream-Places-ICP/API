@@ -3,6 +3,8 @@ const Schema = mongoose.Schema;
 const addressSchema = require('./subdocuments/addressSchema');
 const flavorSchema = require('./subdocuments/flavorSchema');
 const openingHoursSchema = require('./subdocuments/openingHours');
+const Employee = require('./Employee');
+const openingHoursOverflow = require('../utils/openingHoursOverflow');
 
 const shopSchema = new Schema({
 	name: {
@@ -26,9 +28,39 @@ const shopSchema = new Schema({
 		type: Schema.Types.ObjectId,
 		ref: 'User'
 	}
-}, 
-{
-	timestamps: true
-});
+},
+	{
+		timestamps: true
+	});
+
+shopSchema.pre('save', async function () {
+	const defaultUserMutableKeys = ['flavors', 'updatedAt'];
+
+	if (this.openingHours && openingHoursOverflow(this.openingHours)) {
+		throw new Error('Too many opening hours specified')
+	}
+
+	if (!this.$isNew) { 
+		const employee = await Employee
+			.findOne({ user: this.creator, shop: this._id })
+			.populate('user')
+			.exec();
+
+		if (!employee && this.creator.type !== 'admin') {
+			throw new Error('User cannot modify this shop')
+		}
+
+		console.log(this.modifiedPaths());
+		console.log(this.directModifiedPaths());
+
+		if (employee.user.type === 'default' && employee.role !== 'owner') {
+			this.modifiedPaths().forEach(key => {
+				if (!defaultUserMutableKeys.includes(key.toString())) {
+					throw new Error(`User cannot modify '${key}' property`);
+				}
+			})
+		}
+	}
+})
 
 module.exports = mongoose.model('Shop', shopSchema);
