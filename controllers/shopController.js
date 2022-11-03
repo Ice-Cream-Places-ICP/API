@@ -3,7 +3,6 @@ const Shop = require('../models/Shop');
 const User = require('../models/User');
 const Employee = require('../models/Employee');
 const sendResponse = require('../utils/sendResponse');
-const openingHoursOverflow = require('../utils/openingHoursOverflow');
 const shopDto = require('../DTOs/shopDto');
 
 const getShops = async (req, res) => {
@@ -51,10 +50,6 @@ const createShop = async (req, res) => {
         return res.status(400).json(sendResponse(false, 'All fields required'));
     }
 
-    if (openingHoursOverflow) {
-        return res.status(400).json(sendResponse(false, 'Too many opening hours specified'));
-    }
-
     const duplicate = await Shop.findOne({
         name, 'address.country': address.country, 'address.city': address.city,
         'address.postCode': address.postCode, 'address.streetName': address.streetName,
@@ -68,32 +63,29 @@ const createShop = async (req, res) => {
     }
 
     try {
-        let creator = req.userInfo.id;
+        const creator = req.userInfo.id;
 
-        let shopObject = {
+        const shop = new Shop({
             name,
             address,
             openingHours,
             flavors,
             creator
-        };
+        });
 
-        let shop = await Shop.create(shopObject);
-
-        if (req.userType !== 'admin') {
-            await Employee.create({
+        if (req.userInfo.type !== 'admin') {
+            const employee = new Employee({
                 user: creator,
                 shop: shop._id,
                 role: 'owner'
             })
+            await employee.save();
         }
 
-        if (req.userInfo.type !== 'admin') {
-            console.log(req.userInfo.type);
-            shop = shopDto(shop);
-        }
+        await shop.save();
 
-        res.status(200).json(sendResponse(true, 'Shop created', shop));
+        const createdShop = shopDto(shop);
+        res.status(200).json(sendResponse(true, 'Shop created', createdShop));
     } catch (err) {
         res.status(400).json(sendResponse(false, err.message));
     }
@@ -105,13 +97,7 @@ const updateShop = async (req, res) => {
         return res.status(400).json(sendResponse(false, 'Invalid id'));
     }
 
-    let shop;
-    if (req.userInfo.type !== 'admin') {
-        shop = await Shop.findOne({ _id, removedAt: '' });
-    }
-    else {
-        shop = await Shop.findById(_id);
-    }
+    let shop = await Shop.findOne({ _id, removedAt: '' }).exec();
 
     if (!shop) {
         return res.status(400).json(sendResponse(false, 'Shop not found'));
@@ -121,21 +107,12 @@ const updateShop = async (req, res) => {
         name,
         address,
         openingHours,
-        flavors,
-        creator
+        flavors
     } = req.body;
 
     if (!name || !address.country || !address.city || !address.postCode ||
         !address.streetName || !address.streetNumber) {
         return res.status(400).json(sendResponse(false, 'All fields required'));
-    }
-
-    if (openingHoursOverflow) {
-        return res.status(400).json(sendResponse(false, 'Too many opening hours specified'));
-    }
-
-    if (creator && !mongoose.isValidObjectId(creator)) {
-        return res.status(400).json(sendResponse(false, 'Invalid creator id'));
     }
 
     const duplicate = await Shop.findOne({
@@ -146,29 +123,20 @@ const updateShop = async (req, res) => {
         .lean()
         .exec();
 
-    if (duplicate) {
+    if (duplicate && duplicate?._id.toString() !== _id) {
         return res.status(400).json(sendResponse(false, 'Shop already exists'));
     }
 
     try {
-        if (creator) {
-            if (shop.creator !== creator && req.userInfo.type !== 'admin') {
-                return res.status(400).json(sendResponse(false, 'Creator cannot be modified'));
-            }
-            shop.creator = creator;
-        } 
-
         shop.name = name;
         shop.address = address;
         shop.openingHours = openingHours;
         shop.flavors = flavors;
 
-        let result = await shop.save();
+        await shop.save();
 
-        if (req.userInfo.type !== 'admin') {
-            result = shopDto(result);
-        }
-        res.status(200).json(sendResponse(true, 'Shop updated', result));
+        const createdShop = shopDto(shop);
+        res.status(200).json(sendResponse(true, 'Shop updated', createdShop));
     } catch (err) {
         res.status(400).json(sendResponse(false, err.message));
     }
