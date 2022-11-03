@@ -22,6 +22,9 @@ const openingHoursSchema = new Schema({
         type: Number,
         default: 0
     }
+}, 
+{
+    _id: false
 });
 
 openingHoursSchema.pre('save', async function () {

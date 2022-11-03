@@ -10,6 +10,9 @@ const flavorSchema = new Schema({
         type: Boolean,
         default: true
     }
+},
+{
+    _id: false
 });
 
 module.exports = flavorSchema;
