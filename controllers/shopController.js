@@ -3,7 +3,8 @@ const Shop = require('../models/Shop');
 const User = require('../models/User');
 const Employee = require('../models/Employee');
 const sendResponse = require('../utils/sendResponse');
-const shopDto = require('../DTOs/shopDto');
+const shopResDto = require('../DTOs/shopResDto');
+const shopReqDto = require('../DTOs/shopReqDto');
 
 const getShops = async (req, res) => {
     let shops = await Shop.find({ removedAt: '' })
@@ -14,7 +15,7 @@ const getShops = async (req, res) => {
         return res.status(200).json(sendResponse(true, 'No shops found'));
     }
 
-    shops = shops.map(shop => shopDto(shop));
+    shops = shops.map(shop => shopResDto(shop));
     res.status(200).json(sendResponse(true, 'Shops retrieved', shops));
 }
 
@@ -33,7 +34,7 @@ const getShop = async (req, res) => {
         return res.status(400).json(sendResponse(false, 'No such shop'))
     }
 
-    shop = shopDto(shop);
+    shop = shopResDto(shop);
     res.status(200).json(sendResponse(true, 'Shop retrieved', shop));
 }
 
@@ -43,7 +44,7 @@ const createShop = async (req, res) => {
         address,
         openingHours,
         flavors,
-    } = req.body;
+    } = shopReqDto(req.body);
 
     if (!name || !address.country || !address.city || !address.postCode ||
         !address.streetName || !address.streetNumber) {
@@ -84,7 +85,7 @@ const createShop = async (req, res) => {
 
         await shop.save();
 
-        const createdShop = shopDto(shop);
+        const createdShop = shopResDto(shop);
         res.status(200).json(sendResponse(true, 'Shop created', createdShop));
     } catch (err) {
         res.status(400).json(sendResponse(false, err.message));
@@ -108,7 +109,7 @@ const updateShop = async (req, res) => {
         address,
         openingHours,
         flavors
-    } = req.body;
+    } = shopReqDto(req.body);
 
     if (!name || !address.country || !address.city || !address.postCode ||
         !address.streetName || !address.streetNumber) {
@@ -135,7 +136,7 @@ const updateShop = async (req, res) => {
 
         await shop.save();
 
-        const createdShop = shopDto(shop);
+        const createdShop = shopResDto(shop);
         res.status(200).json(sendResponse(true, 'Shop updated', createdShop));
     } catch (err) {
         res.status(400).json(sendResponse(false, err.message));
