@@ -1,10 +1,9 @@
-const router = require('express').Router();
 const User = require('../models/userModel.js');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const sendResponse = require('../utils/sendResponse.js');
 
-router.post('/register', async (req, res) => {
+const userRegister = async (req, res) => {
 	console.log('----------------------------------------------');
 	console.log('REGISTER ORDER');
 
@@ -32,9 +31,9 @@ router.post('/register', async (req, res) => {
 		console.log(e);
 		res.json(sendResponse(false, e));
 	}
-});
+};
 
-router.post('/login', async (req, res) => {
+const userLogin = async (req, res) => {
 	console.log('----------------------------------------------');
 	console.log('LOGIN ORDER');
 
@@ -60,6 +59,6 @@ router.post('/login', async (req, res) => {
 	} catch (e) {
 		res.json(sendResponse(false, e));
 	}
-});
+};
 
-module.exports = router;
+module.exports = { userRegister, userLogin };

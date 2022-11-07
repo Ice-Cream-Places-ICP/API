@@ -16,6 +16,16 @@ const userSchema = mongoose.Schema({
 		required: false,
 		default: 'default',
 	},
+	occupation: {
+		// ice cream shops ID's
+		type: [{
+			type: String,
+		}]
+	},
+	employees: [{
+		// users ID's
+		type: String
+	}]
 });
 
 userSchema.pre('save', async function () {
