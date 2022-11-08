@@ -1,39 +1,44 @@
-const sendResponse = require('../utils/sendResponse.js');
-const Shop = require('../models/shopModel.js');
+const sendResponse = require('../../utils/sendResponse.js');
+const Shop = require('../../models/shopModel.js');
+const User = require('../../models/userModel');
 const jwt = require('jsonwebtoken');
+const isOwnerOrAdmin = require('../../utils/isOwnerOrAdmin.js');
+const orderComment = require('../../utils/orderComment');
 
 const getAllShops = async (req, res) => {
-	console.log('----------------------------------------------');
-	console.log('GET ALL SHOPS');
+	orderComment("'get all shop'");
 
-	console.log(req);
+	const allShops = await Shop.find({});
+
+	res.json(sendResponse(true, 'That all what we have', allShops));
 };
 
 const addShop = async (req, res) => {
-	console.log('----------------------------------------------');
-	console.log('ADD SHOP ORDER');
+	orderComment("'add shop order'");
 
 	try {
-		let req_token = req.headers.token;
+		const ownerId = jwt.decode(req.headers.token).toString();
+
+		if (!(await isOwnerOrAdmin(ownerId))) {
+			throw 'This user is not an owner';
+		}
+
 		let req_name = req.body.name;
 		let req_address = req.body.address;
 		let req_flavors = req.body.flavors;
 		let req_openHours = req.body.openHours;
-
-		const owner = jwt.decode(req_token).toString();
 
 		const newShop = new Shop({
 			name: req_name,
 			address: req_address,
 			flavors: req_flavors,
 			openHours: req_openHours,
-			ownerId: owner,
+			ownerId: ownerId,
 		});
 
 		console.log('newShop', newShop);
 
 		await newShop.save();
-
 		res.json(sendResponse(true, 'New shop created', newShop));
 	} catch (e) {
 		console.log(e);

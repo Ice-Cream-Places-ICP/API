@@ -1,7 +1,7 @@
-const User = require('../models/userModel.js');
+const User = require('../../models/userModel.js');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const sendResponse = require('../utils/sendResponse.js');
+const sendResponse = require('../../utils/sendResponse.js');
 
 const userRegister = async (req, res) => {
 	console.log('----------------------------------------------');

@@ -2,16 +2,16 @@ require('dotenv').config({ path: './config.env' });
 const express = require('express');
 const mongoose = require('mongoose');
 
-const auth = require('./routes/authRoutes');
-const shop = require('./routes/shopRoutes.js');
+const authRouts = require('./routes/authRoutes');
+const shopRoutes = require('./routes/shopRoutes.js');
 const cors = require('cors');
 const app = express();
 
 //MIDDLEWARE
 app.use(express.json());
 app.use(cors());
-app.use('/auth', auth);
-app.use('/shop', shop);
+app.use('/auth', authRouts);
+app.use('/shop', shopRoutes);
 
 //sample get endpoint
 app.get('/sample', (req, res) => {
@@ -19,7 +19,6 @@ app.get('/sample', (req, res) => {
 });
 
 //DATABASE CONNECTION
-// TODO: create and connect with database
 mongoose.connect(process.env.DB_CONNECTION, () => {
 	console.log('Database Connected');
 });
