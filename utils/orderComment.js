@@ -1,6 +1,6 @@
 const orderComment = comment => {
 	console.log('----------------------------------------------');
-	console.log('GET ' + comment.toUpperCase() + ' ORDER');
+	console.log('SERVER GET ' + comment.toUpperCase() + ' ORDER');
 };
 
 module.exports = orderComment;

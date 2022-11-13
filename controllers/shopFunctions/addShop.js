@@ -1,13 +1,11 @@
 const sendResponse = require('../../utils/sendResponse.js');
 const Shop = require('../../models/shopModel.js');
-const User = require('../../models/userModel');
 const jwt = require('jsonwebtoken');
 const isOwnerOrAdmin = require('../../utils/isOwnerOrAdmin.js');
 const orderComment = require('../../utils/orderComment');
 
 const addShop = async (req, res) => {
 	orderComment("'add shop order'");
-	// TODO: dopisać sklep do konkretnego user'a
 	try {
 		const ownerId = jwt.decode(req.headers.token).toString();
 

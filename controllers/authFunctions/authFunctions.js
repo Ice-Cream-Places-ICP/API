@@ -2,10 +2,10 @@ const User = require('../../models/userModel.js');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const sendResponse = require('../../utils/sendResponse.js');
+const orderComment = require('../../utils/orderComment.js');
 
 const userRegister = async (req, res) => {
-	console.log('----------------------------------------------');
-	console.log('REGISTER ORDER');
+	orderComment('register');
 
 	try {
 		let req_email = req.body.email;
