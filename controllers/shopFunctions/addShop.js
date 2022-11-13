@@ -5,17 +5,9 @@ const jwt = require('jsonwebtoken');
 const isOwnerOrAdmin = require('../../utils/isOwnerOrAdmin.js');
 const orderComment = require('../../utils/orderComment');
 
-const getAllShops = async (req, res) => {
-	orderComment("'get all shop'");
-
-	const allShops = await Shop.find({});
-
-	res.json(sendResponse(true, 'That all what we have', allShops));
-};
-
 const addShop = async (req, res) => {
 	orderComment("'add shop order'");
-
+	// TODO: dopisać sklep do konkretnego user'a
 	try {
 		const ownerId = jwt.decode(req.headers.token).toString();
 
@@ -46,4 +38,4 @@ const addShop = async (req, res) => {
 	}
 };
 
-module.exports = { addShop, getAllShops };
+module.exports = addShop;

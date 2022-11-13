@@ -1,6 +1,7 @@
 const express = require('express');
 const deleteShop = require('../controllers/shopFunctions/deleteShop.js');
-const { addShop, getAllShops } = require('../controllers/shopFunctions/shopFunctions.js');
+const addShop = require('../controllers/shopFunctions/addShop.js');
+const getAllShops = require('../controllers/shopFunctions/getAllShops.js');
 
 const router = express.Router();
 
