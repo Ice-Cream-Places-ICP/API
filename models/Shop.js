@@ -40,18 +40,17 @@ shopSchema.pre('save', async function () {
 		throw new Error('Too many opening hours specified')
 	}
 
-	if (!this.$isNew) { 
+	if (!this.$isNew) {
 		const employee = await Employee
 			.findOne({ user: this.creator, shop: this._id })
 			.populate('user')
 			.exec();
 
-		if (!employee && this.creator.type !== 'admin') {
-			throw new Error('User cannot modify this shop')
-		}
+		await this.populate('creator');
 
-		console.log(this.modifiedPaths());
-		console.log(this.directModifiedPaths());
+		if (!employee && this.creator.type !== 'admin') {
+			throw new Error('User cannot modify this shop');
+		}
 
 		if (employee.user.type === 'default' && employee.role !== 'owner') {
 			this.modifiedPaths().forEach(key => {
