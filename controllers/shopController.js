@@ -5,6 +5,7 @@ const Employee = require('../models/Employee');
 const sendResponse = require('../utils/sendResponse');
 const shopResDto = require('../DTOs/shopResDto');
 const shopReqDto = require('../DTOs/shopReqDto');
+const { getModifiedKeys, canModify } = require('../utils/verifyModifiedKeys');
 
 const getShops = async (req, res) => {
     let shops = await Shop.find({ removedAt: '' })
@@ -74,6 +75,7 @@ const createShop = async (req, res) => {
             creator
         });
 
+        await shop.save();
         if (req.userInfo.type !== 'admin') {
             const employee = new Employee({
                 user: creator,
@@ -82,8 +84,6 @@ const createShop = async (req, res) => {
             })
             await employee.save();
         }
-
-        await shop.save();
 
         const createdShop = shopResDto(shop);
         res.status(200).json(sendResponse(true, 'Shop created', createdShop));
@@ -110,6 +110,22 @@ const updateShop = async (req, res) => {
         openingHours,
         flavors
     } = shopReqDto(req.body);
+
+
+    const emp = await Employee.find({ shop: _id }).exec();
+    if (emp && emp.role !== 'owner') {
+        const modifiedKeys = getModifiedKeys(shopResDto(shop), {
+            name,
+            address,
+            openingHours,
+            flavors
+        });
+        const allowed = canModify(modifiedKeys, ['flavors']);
+        if (!allowed) {
+            return res.status(400).json(sendResponse(false, 'Only owner can modify those fields'));
+        }
+    }
+
 
     if (!name || !address.country || !address.city || !address.postCode ||
         !address.streetName || !address.streetNumber) {
