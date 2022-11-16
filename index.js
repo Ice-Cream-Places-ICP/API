@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const errorHandler = require('./middleware/errorHandler');
 const mongoose = require('mongoose');
 
 const authRouts = require('./routes/authRoutes');
@@ -12,6 +13,7 @@ app.use(express.json());
 app.use(cors());
 app.use('/auth', authRouts);
 app.use('/shop', shopRoutes);
+app.use(errorHandler);
 
 //sample get endpoint
 app.get('/sample', (req, res) => {
