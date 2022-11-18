@@ -4,8 +4,8 @@
   "description": "ice-cream-places-icp",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon index.js",
-    "server": "node index.js",
+    "dev": "nodemon server.js",
+    "server": "node server.js",
     "test": "npx jest" 
   },
   "repository": {

@@ -1,11 +1,10 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 const errorHandler = require('./middleware/errorHandler');
-const mongoose = require('mongoose');
 
 const authRouts = require('./routes/authRoutes');
 const shopRoutes = require('./routes/shopRoutes.js');
-const cors = require('cors');
 const app = express();
 
 //MIDDLEWARE
@@ -20,12 +19,4 @@ app.get('/sample', (req, res) => {
 	res.send('I am from API');
 });
 
-//DATABASE CONNECTION
-mongoose.connect(process.env.DB_CONNECTION, () => {
-	console.log('Database Connected');
-});
-
-//SERVER LISTENING
-app.listen(process.env.PORT, () => {
-	console.log(`Server up at port ${process.env.PORT}`);
-});
+module.exports = { app };
