@@ -1,5 +1,5 @@
 const request = require('supertest');
-const { app } = require('../index');
+const { app } = require('../../index');
 const mongoose = require('mongoose');
 
 const userRegisterTest = () => describe('POST /auth/register', () => {
