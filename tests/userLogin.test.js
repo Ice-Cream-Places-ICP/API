@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const User = require('../models/userModel.js');
 const jwt = require('jsonwebtoken');
 
-describe('POST /auth/register', () => {
+const userLoginTest = () => describe('POST /auth/login', () => {
     const validPassword = 'ABCdef1@';
     const invalidPassword = 'invalid-password';
     const validEmail = 'test-email@gmail.com';
@@ -167,3 +167,5 @@ describe('POST /auth/register', () => {
         })
     })
 });
+
+module.exports = userLoginTest;

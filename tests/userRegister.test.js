@@ -2,7 +2,7 @@ const request = require('supertest');
 const { app } = require('../index');
 const mongoose = require('mongoose');
 
-describe('POST /auth/register', () => {
+const userRegisterTest = () => describe('POST /auth/register', () => {
     const validPassword = 'ABCdef1@';
     const invalidPassword = 'invalid-password';
     const validEmail = 'test-email@gmail.com';
@@ -23,6 +23,7 @@ describe('POST /auth/register', () => {
     })
 
     afterAll(async () => {
+        await mongoose.connection.dropDatabase();
         await mongoose.connection.close();
     })
 
@@ -179,3 +180,5 @@ describe('POST /auth/register', () => {
         })
     })
 });
+
+module.exports = userRegisterTest;
