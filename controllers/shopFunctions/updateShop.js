@@ -13,7 +13,7 @@ const updateShop = async (req, res) => {
 			throw 'Something is wrong with this user';
 		}
 
-		const shopId = req.params.shopId;
+		const shopId = req.params.id;
 		const updateContent = req.body;
 
 		await Shop.updateOne({ _id: shopId }, updateContent);

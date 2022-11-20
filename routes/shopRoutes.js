@@ -8,9 +8,9 @@ const updateShop = require('../controllers/shopFunctions/updateShop.js');
 const router = express.Router();
 
 router.get('/', getAllShops);
-router.get('/:shopId', getShopById);
-router.post('/add', addShop);
-router.put('/update/:shopId', updateShop);
-router.delete('/delete/:shopId', deleteShop);
+router.get('/:id', getShopById);
+router.post('/', addShop);
+router.put('/:id', updateShop);
+router.delete('/:id', deleteShop);
 
 module.exports = router;

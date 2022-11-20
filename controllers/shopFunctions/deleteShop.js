@@ -19,11 +19,11 @@ const deleteShop = async (req, res) => {
 			throw "This user can't execute this order";
 		}
 
-		if (!(await Shop.findById(req.params.shopId))) {
+		if (!(await Shop.findById(req.params.id))) {
 			throw "This shop doesn't exist";
 		}
 
-		await Shop.findByIdAndDelete(req.params.shopId);
+		await Shop.findByIdAndDelete(req.params.id);
 
 		console.log('Shop Deleted');
 		res.json(sendResponse(true, 'Shop Deleted'));

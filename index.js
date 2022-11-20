@@ -13,7 +13,7 @@ app.use(requestLogger);
 app.use(express.json());
 app.use(cors());
 app.use('/auth', authRouts);
-app.use('/shop', shopRoutes);
+app.use('/shops', shopRoutes);
 app.use(errorHandler);
 
 //sample get endpoint
