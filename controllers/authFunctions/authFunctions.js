@@ -1,6 +1,7 @@
 const User = require('../../models/userModel.js');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const validator = require('validator');
 const sendResponse = require('../../utils/sendResponse.js');
 const orderComment = require('../../utils/orderComment.js');
 
@@ -12,8 +13,21 @@ const userRegister = async (req, res) => {
 		let req_password = req.body.password;
 		let req_type = req.body.type === '' ? 'default' : req.body.type;
 
+		if (!req_email || !req_password) {
+			return res.status(400).json(sendResponse(false, 'All fields are required'));
+		}
+
+		if (!validator.isEmail(req_email)) {
+			return res.status(400).json(sendResponse(false, 'Invalid email'));
+		}
+
+		if (!validator.isStrongPassword(req_password))
+		{
+			return res.status(400).json(sendResponse(false, 'Password must contain minimum 8 letters containing at least - 1 lowercase, 1 uppercase, 1 number, 1 symbol'));
+		}
+
 		if (await User.findOne({ email: req_email })) {
-			throw 'This user already exist';
+			return res.status(400).json(sendResponse(false, 'User already exists'));
 		}
 
 		const newUser = new User({
@@ -26,7 +40,7 @@ const userRegister = async (req, res) => {
 
 		console.log('New user created');
 		console.log(newUser);
-		res.json('New user created');
+		res.status(200).json(sendResponse(true, 'New user created'));
 	} catch (e) {
 		console.log(e);
 		res.json(sendResponse(false, e));
