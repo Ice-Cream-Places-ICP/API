@@ -38,36 +38,29 @@ const userRegister = async (req, res) => {
 
 		await newUser.save();
 
-		console.log('New user created');
-		console.log(newUser);
 		res.status(200).json(sendResponse(true, 'New user created'));
 	} catch (e) {
-		console.log(e);
 		res.json(sendResponse(false, e));
 	}
 };
 
 const userLogin = async (req, res) => {
-	console.log('----------------------------------------------');
-	console.log('LOGIN ORDER');
-
 	try {
 		let req_email = req.body.email;
 		let req_password = req.body.password;
 
-		const user = await User.findOne({ email: req_email });
-
-		if (!user) {
-			throw "This user doesn't exist";
+		if (!req_email || !req_password) {
+			return res.status(400).json(sendResponse(false, 'All fields are required'));
 		}
 
-		if (!(await bcrypt.compare(req_password, user.password))) {
-			throw 'Wrong password';
+		const user = await User.findOne({ email: req_email });
+
+		if (!user || !(await bcrypt.compare(req_password, user.password))) {
+			return res.status(400).json(sendResponse(false, 'Invalid credentials'));
 		}
 
 		const token = await jwt.sign(user._id.toString(), process.env.TOKEN_SECRET);
 
-		console.log('Login Successfully');
 		res.header('token', token);
 		res.status(200).json(sendResponse(true, 'Login Successfully'));
 	} catch (e) {
