@@ -1,13 +1,12 @@
 const sendResponse = require('../utils/sendResponse');
 
-const verifyUserType = (...allowedUserTypes) => {
+const verifyUser = (...allowedRoles) => {
     return (req, res, next) => {
-        const userTypes = [...allowedUserTypes];
-        if (!userTypes.includes(req?.userInfo?.type)) {
+        if (![...allowedRoles].includes(req?.user?.role)) {
             return res.status(400).json(sendResponse(false, 'This action is not permitted'))
         }
         next();
     }
 }
 
-module.exports = verifyUserType;
+module.exports = verifyUser;
