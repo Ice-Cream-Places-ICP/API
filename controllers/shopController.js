@@ -1,22 +1,15 @@
 const mongoose = require('mongoose');
 const Shop = require('../models/Shop');
-const User = require('../models/User');
-const Employee = require('../models/Employee');
+const { roles } = require('../config/constants');
 const sendResponse = require('../utils/sendResponse');
-const shopResDto = require('../DTOs/shopResDto');
-const shopReqDto = require('../DTOs/shopReqDto');
-const { getModifiedKeys, canModify } = require('../utils/verifyModifiedKeys');
 
 const getShops = async (req, res) => {
-    let shops = await Shop.find({ removedAt: '' })
-        .populate({ path: 'creator', select: '-password' })
-        .exec();
+    let shops = await Shop.find({ removedAt: '' }).exec();
 
     if (!shops?.length) {
         return res.status(200).json(sendResponse(true, 'No shops found'));
     }
 
-    shops = shops.map(shop => shopResDto(shop));
     res.status(200).json(sendResponse(true, 'Shops retrieved', shops));
 }
 
@@ -24,18 +17,15 @@ const getShop = async (req, res) => {
     const _id = req.params.id;
 
     if (!mongoose.isValidObjectId(_id)) {
-        return res.status(400).json(sendResponse(false, 'Invalid id'))
+        return res.status(400).json(sendResponse(false, 'Invalid shop id'))
     }
 
-    let shop = await Shop.findOne({ _id, removedAt: '' })
-        .populate({ path: 'creator', select: '-password' })
-        .exec();
+    let shop = await Shop.findOne({ _id, removedAt: '' }).exec();
 
     if (!shop) {
-        return res.status(400).json(sendResponse(false, 'No such shop'))
+        return res.status(400).json(sendResponse(false, 'Shop not found'))
     }
 
-    shop = shopResDto(shop);
     res.status(200).json(sendResponse(true, 'Shop retrieved', shop));
 }
 
@@ -45,7 +35,9 @@ const createShop = async (req, res) => {
         address,
         openingHours,
         flavors,
-    } = shopReqDto(req.body);
+        owners,
+        employees
+    } = req.body;
 
     if (!name || !address.country || !address.city || !address.postCode ||
         !address.streetName || !address.streetNumber) {
@@ -65,28 +57,23 @@ const createShop = async (req, res) => {
     }
 
     try {
-        const creator = req.userInfo.id;
+        const creator = req.user.id;
+        if (req.user.role !== roles.ADMIN) {
+            owners.push(mongoose.Types.ObjectId(req.user.id));
+        }
 
         const shop = new Shop({
             name,
             address,
             openingHours,
             flavors,
+            owners,
+            employees,
             creator
         });
 
         await shop.save();
-        if (req.userInfo.type !== 'admin') {
-            const employee = new Employee({
-                user: creator,
-                shop: shop._id,
-                role: 'owner'
-            })
-            await employee.save();
-        }
-
-        const createdShop = shopResDto(shop);
-        res.status(200).json(sendResponse(true, 'Shop created', createdShop));
+        res.status(200).json(sendResponse(true, 'Shop created', shop));
     } catch (err) {
         res.status(400).json(sendResponse(false, err.message));
     }
@@ -95,7 +82,7 @@ const createShop = async (req, res) => {
 const updateShop = async (req, res) => {
     const _id = req.params.id;
     if (!mongoose.isValidObjectId(_id)) {
-        return res.status(400).json(sendResponse(false, 'Invalid id'));
+        return res.status(400).json(sendResponse(false, 'Invalid shop id'));
     }
 
     let shop = await Shop.findOne({ _id, removedAt: '' }).exec();
@@ -108,24 +95,10 @@ const updateShop = async (req, res) => {
         name,
         address,
         openingHours,
-        flavors
-    } = shopReqDto(req.body);
-
-
-    const emp = await Employee.find({ shop: _id }).exec();
-    if (emp && emp.role !== 'owner') {
-        const modifiedKeys = getModifiedKeys(shopResDto(shop), {
-            name,
-            address,
-            openingHours,
-            flavors
-        });
-        const allowed = canModify(modifiedKeys, ['flavors']);
-        if (!allowed) {
-            return res.status(400).json(sendResponse(false, 'Only owner can modify those fields'));
-        }
-    }
-
+        flavors,
+        owners, 
+        employees
+    } = req.body;
 
     if (!name || !address.country || !address.city || !address.postCode ||
         !address.streetName || !address.streetNumber) {
@@ -149,11 +122,12 @@ const updateShop = async (req, res) => {
         shop.address = address;
         shop.openingHours = openingHours;
         shop.flavors = flavors;
+        shop.owners = owners;
+        shop.employees = employees;
 
         await shop.save();
 
-        const createdShop = shopResDto(shop);
-        res.status(200).json(sendResponse(true, 'Shop updated', createdShop));
+        res.status(200).json(sendResponse(true, `Shop ${shop.name} updated`, shop));
     } catch (err) {
         res.status(400).json(sendResponse(false, err.message));
     }
@@ -162,12 +136,12 @@ const updateShop = async (req, res) => {
 const deleteShop = async (req, res) => {
     const _id = req.params.id;
     if (!mongoose.isValidObjectId(_id)) {
-        return res.status(400).json(sendResponse(false, 'Invalid id'));
+        return res.status(400).json(sendResponse(false, 'Invalid shop id'));
     }
 
     const shop = await Shop.findOne({ _id, removedAt: '' });
     if (!shop) {
-        return res.status(400).json(sendResponse(false, 'No such shop'))
+        return res.status(400).json(sendResponse(false, 'Shop not found'))
     }
 
     try {

@@ -1,43 +1,35 @@
-const express = require('express');
+const { jobPositions, roles } = require('../config/constants');
+const router = require('express').Router();
+const shopContoller = require('../controllers/shopController');
 const verifyToken = require('../middleware/verifyToken');
 const getUserInfo = require('../middleware/getUserInfo');
-const {
-    getShops,
-    getShop,
-    createShop,
-    updateShop,
-    deleteShop
-} = require('../controllers/shopController');
-const verifyUserType = require('../middleware/verifyUserType');
-const verifyEmployeeRole = require('../middleware/verifyEmployeeRole');
-const { shopRoles, userTypes } = require('../config/constants');
+const verifyUser = require('../middleware/verifyUser');
+const verifyJobPosition = require('../middleware/verifyJobPosition');
 
-const router = express.Router();
-
-router.get('/', getShops);
-router.get('/:id', getShop);
+router.get('/', shopContoller.getShops);
+router.get('/:id', shopContoller.getShop);
 
 router.use(verifyToken);
 router.use(getUserInfo);
 
 router.post(
     '/',
-    verifyUserType(userTypes.ADMIN, userTypes.DEFAULT),
-    createShop
+    verifyUser(roles.ADMIN, roles.DEFAULT),
+    shopContoller.createShop
 );
 
 router.patch(
     '/:id', 
-    verifyUserType(userTypes.ADMIN, userTypes.DEFAULT), 
-    verifyEmployeeRole(shopRoles.OWNER, shopRoles.EMPLOYEE), 
-    updateShop
+    verifyUser(roles.ADMIN, roles.DEFAULT), 
+    verifyJobPosition(jobPositions.OWNER, jobPositions.EMPLOYEE), 
+    shopContoller.updateShop
 );
 
 router.delete(
     '/:id', 
-    verifyUserType(userTypes.ADMIN, userTypes.DEFAULT), 
-    verifyEmployeeRole(shopRoles.OWNER), 
-    deleteShop
+    verifyUser(roles.ADMIN, roles.DEFAULT), 
+    verifyJobPosition(jobPositions.OWNER), 
+    shopContoller.deleteShop
 );
 
 // if (req.userInfo.type === 'admin') {
