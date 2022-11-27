@@ -1,5 +1,6 @@
 const User = require('../models/User');
-const Employee = require('../models/Employee');
+const Shop = require('../models/Shop');
+const { jobPositions } = require('../config/constants');
 const mongoose = require('mongoose');
 const sendResponse = require('../utils/sendResponse');
 
@@ -8,40 +9,32 @@ const getUserInfo = async (req, res, next) => {
         return res.status(400).json(sendResponse(false, 'Access denied'));
     }
 
-    const user = await User.findById(req.userId).exec(); 
+    const user = await User.findById(req.userId).exec();
     if (!user) {
         return res.status(400).json(sendResponse(false, 'Access denied'));
     }
-    
+
     let userInfo = {
-        id: req.userId,
-        email: user.email, 
-        type: user.type
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        occupations: []
     }
 
-    const employee = await Employee.find({ user: user._id }).exec();
-    if (!employee) {
-        req.userInfo = userInfo;
-        return next();
+    const shops = await Shop.find({ $or: [{ employees: user._id }, { owners: user._id }] }).exec();
+
+    if (!Array.isArray(shops)) shops = [shops];
+
+    for (let i = 0; i < shops.length; i++) {
+        if (shops[i].employees.includes(user._id)) {
+            userInfo.occupations.push({ shopId: shops[i]._id.toString(), jobPosition: jobPositions.EMPLOYEE })
+        } 
+        if (shops[i].owners.includes(user._id)) {
+            userInfo.occupations.push({ shopId: shops[i]._id.toString(), jobPosition: jobPositions.OWNER })
+        }
     }
 
-    let occupations = [];
-    if (Array.isArray(employee)) {
-        employee.forEach(e => {
-            occupations.push({
-                shopId: e.shop,
-                role: e.role
-            });
-        })
-    } else {
-        occupations.push({
-            shopId: employee.shop,
-            role: employee.role
-        });
-    }
-
-    userInfo.occupations = occupations;
-    req.userInfo = userInfo;
+    req.user = userInfo;
     next();
 }
 
