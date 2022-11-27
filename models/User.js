@@ -12,7 +12,7 @@ const userSchema = mongoose.Schema({
 		required: true,
 		minlength: 5,
 	},
-	type: {
+	role: {
 		type: String,
 		default: 'default',
 		enum: ['default', 'admin']
@@ -25,15 +25,6 @@ const userSchema = mongoose.Schema({
 userSchema.pre('save', async function () {
 	const salt = await bcrypt.genSalt(10);
 	this.password = await bcrypt.hash(this.password, salt);
-});
-
-userSchema.pre('save', async function () {
-	if (this.type == '') {
-		this.type = 'default';
-	}
-	if (this.type == null) {
-		this.type = 'default';
-	}
 });
 
 module.exports = mongoose.model('User', userSchema);
