@@ -47,16 +47,16 @@ const updateShop = async (req, res) => {
             let userShops = user.shops;
 
             if (!employees.includes(employees.find(e => e.email === req.user.email))) {
-                return res.status(400).sendResponse(false, `As owner you cannot remove yourself from employee list`)
+                return res.status(400).json(sendResponse(false, `As owner you cannot remove yourself from employee list`));
             }
 
             if (!user) {
-                return res.status(400).sendResponse(false, `You cannot add user with email: '${employee.email}', because he does not exist`);
+                return res.status(400).json(sendResponse(false, `You cannot add user with email: '${employee.email}', because he does not exist`));
             }
 
             let userShop = userShops.find(s => s.id === doc._id);
             if (userShops.includes(userShop) && employee.jobPosition === userShop.jobPosition) {
-                return res.status(400).sendResponse(false, `User with email '${employee.email}' was already added`);
+                return res.status(400).json(sendResponse(false, `User with email '${employee.email}' was already added`));
             }
         });
     }
