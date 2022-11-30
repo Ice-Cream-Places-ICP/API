@@ -1,13 +1,14 @@
-const Shop = require('../../models/shopModel.js');
 const sendResponse = require('../../utils/sendResponse.js');
-const orderComment = require('../../utils/orderComment');
+const Shop = require('../../models/Shop');
 
 const getAllShops = async (req, res) => {
-	orderComment("'get all shop'");
+    let shops = await Shop.find({ removedAt: '' }).exec();
 
-	const allShops = await Shop.find({});
+    if (!shops?.length) {
+        return res.status(200).json(sendResponse(true, 'No shops found'));
+    }
 
-	res.json(sendResponse(true, 'That all what we have', allShops));
-};
+    res.status(200).json(sendResponse(true, 'Shops retrieved', shops));
+}
 
 module.exports = getAllShops;

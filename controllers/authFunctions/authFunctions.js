@@ -1,17 +1,18 @@
-const User = require('../../models/userModel.js');
+const User = require('../../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const validator = require('validator');
 const sendResponse = require('../../utils/sendResponse.js');
-const orderComment = require('../../utils/orderComment.js');
 
 const userRegister = async (req, res) => {
-	orderComment('register');
-
 	try {
 		let req_email = req.body.email;
 		let req_password = req.body.password;
-		let req_type = req.body.type === '' ? 'default' : req.body.type;
+		let req_roles = req.body.roles;
+
+		if (!req_roles) {
+			req_roles = ['default'];
+		} 
 
 		if (!req_email || !req_password) {
 			return res.status(400).json(sendResponse(false, 'All fields are required'));
@@ -21,8 +22,7 @@ const userRegister = async (req, res) => {
 			return res.status(400).json(sendResponse(false, 'Invalid email'));
 		}
 
-		if (!validator.isStrongPassword(req_password))
-		{
+		if (!validator.isStrongPassword(req_password)) {
 			return res.status(400).json(sendResponse(false, 'Password must contain minimum 8 letters containing at least - 1 lowercase, 1 uppercase, 1 number, 1 symbol'));
 		}
 
@@ -33,7 +33,7 @@ const userRegister = async (req, res) => {
 		const newUser = new User({
 			email: req_email,
 			password: req_password,
-			type: req_type,
+			roles: req_roles,
 		});
 
 		await newUser.save();
@@ -59,7 +59,10 @@ const userLogin = async (req, res) => {
 			return res.status(400).json(sendResponse(false, 'Invalid credentials'));
 		}
 
-		const token = await jwt.sign(user._id.toString(), process.env.TOKEN_SECRET);
+		const token = await jwt.sign(
+			user._id.toString(),
+			process.env.TOKEN_SECRET
+		);
 
 		res.header('token', token);
 		res.status(200).json(sendResponse(true, 'Login Successfully'));

@@ -1,7 +1,7 @@
 const request = require('supertest');
 const { app } = require('../../index');
 const mongoose = require('mongoose');
-const User = require('../../models/userModel.js');
+const User = require('../../models/User');
 const jwt = require('jsonwebtoken');
 
 const userLoginTest = () => describe('POST /auth/login', () => {

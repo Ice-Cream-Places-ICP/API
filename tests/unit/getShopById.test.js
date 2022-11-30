@@ -1,7 +1,7 @@
 const request = require('supertest');
 const { app } = require('../../index');
 const mongoose = require('mongoose');
-const Shop = require('../../models/shopModel');
+const Shop = require('../../models/Shop');
 
 const getShopByIdTest = () => describe('GET /shops/:id', () => {
     let res;
@@ -14,22 +14,32 @@ const getShopByIdTest = () => describe('GET /shops/:id', () => {
     beforeAll(async () => {
         await mongoose.connect(process.env.TEST_DB_CONNECTION);
         body = {
-            name: "test-shop",
+            name: "test",
             address: {
-                city: "test-city",
-                street: "test-street",
-                number: "1"
+                country: "test",
+                city: "test",
+                postCode: "test",
+                streetName: "test",
+                streetNumber: "test"
             },
-            flavors: ["test-flavor-1", "test-flavor-2", "test-flavor-3", "test-flavor-4"],
-            openHours: [
-                ["1:30", "17:40"],
-                ["2:30", "13:30"],
-                ["3:40", "14:40"],
-                ["4:30", "16:40"],
-                ["5:40", "17:40"],
-                ["6:40", "17:40"],
-                ["7:40", "17:40"]
-            ]
+            openingHours: [
+                {
+                    weekDay: 0,
+                    startHour: 1,
+                    startMinute: 20,
+                    endHour: 2,
+                    endMinute: 20
+                }
+            ],
+            flavors: [
+                {
+                    name: "test",
+                    available: true
+                }
+            ],
+            employees: [],
+            createdAt: new Date(),
+            updatedAt: new Date()
         }
         const shop = new Shop(body);
         const createdShop = await shop.save();
@@ -69,7 +79,7 @@ const getShopByIdTest = () => describe('GET /shops/:id', () => {
     })
 
     describe('given valid id of shop that exists within database', () => {
-        const validResponseMessage = 'Shop succesfully retrieved';
+        const validResponseMessage = 'Shop retrieved';
         beforeEach(async () => {
             res = await request(app)
                 .get(route)
@@ -83,7 +93,7 @@ const getShopByIdTest = () => describe('GET /shops/:id', () => {
             let shop = body;
             shop._id = id;
             expect(res.body.content).toEqual(
-                expect.objectContaining(shop)
+                expect.objectContaining(JSON.parse(JSON.stringify(shop)))
             );
         })
 
@@ -109,7 +119,7 @@ const getShopByIdTest = () => describe('GET /shops/:id', () => {
     });
 
     describe('given invalid id', () => {
-        const validResponseMessage = 'Invalid id';
+        const validResponseMessage = 'Invalid shop id';
         beforeEach(async () => {
             res = await request(app)
                 .get(routeWithInvalidId)

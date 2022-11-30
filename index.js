@@ -15,11 +15,5 @@ app.use(cors());
 app.use('/auth', authRouts);
 app.use('/shops', shopRoutes);
 app.use(errorHandler);
-app.use('/shops', shopRoutes);
-
-//sample get endpoint
-app.get('/sample', (req, res) => {
-	res.send('I am from API');
-});
 
 module.exports = { app };

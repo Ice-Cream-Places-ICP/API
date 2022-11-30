@@ -1,23 +1,21 @@
-const orderComment = require('../../utils/orderComment');
 const sendResponse = require('../../utils/sendResponse');
-const Shop = require('../../models/shopModel.js');
+const Shop = require('../../models/Shop');
 const mongoose = require('mongoose');
 
 const getShopById = async (req, res) => {
-	try {
-		if (!mongoose.isValidObjectId(req.params.id)) {
-			return res.status(400).json(sendResponse(false, 'Invalid id'));
-		}
+    const _id = req.params.id;
 
-		const shop = await Shop.findById(req.params.id);
-		if (!shop) {
-			return res.status(400).json(sendResponse(false, 'Shop not found'));
-		}
-		
-		res.json(sendResponse(true, 'Shop succesfully retrieved', shop));
-	} catch (err) {
-		res.json(sendResponse(false, err));
-	}
-};
+    if (!mongoose.isValidObjectId(_id)) {
+        return res.status(400).json(sendResponse(false, 'Invalid shop id'))
+    }
+
+    let shop = await Shop.findOne({ _id, removedAt: '' }).exec();
+
+    if (!shop) {
+        return res.status(400).json(sendResponse(false, 'Shop not found'))
+    }
+
+    res.status(200).json(sendResponse(true, 'Shop retrieved', shop));
+}
 
 module.exports = getShopById;

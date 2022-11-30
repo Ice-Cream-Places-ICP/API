@@ -1,39 +1,68 @@
 const sendResponse = require('../../utils/sendResponse.js');
-const Shop = require('../../models/shopModel.js');
-const jwt = require('jsonwebtoken');
-const isOwnerOrAdmin = require('../../utils/isOwnerOrAdmin.js');
-const orderComment = require('../../utils/orderComment');
+const Shop = require('../../models/Shop');
+const { roles } = require('../../config/constants');
 
 const addShop = async (req, res) => {
-	orderComment("'add shop order'");
-	try {
-		const ownerId = jwt.decode(req.headers.token).toString();
+    let {
+        name,
+        address,
+        openingHours,
+        flavors,
+        employees
+    } = req.body;
 
-		if (!(await isOwnerOrAdmin(ownerId))) {
-			throw 'This user is not an owner';
-		}
+    if (!name || !address.country || !address.city || !address.postCode ||
+        !address.streetName || !address.streetNumber) {
+        return res.status(400).json(sendResponse(false, 'All fields required'));
+    }
 
-		let req_name = req.body.name;
-		let req_address = req.body.address;
-		let req_flavors = req.body.flavors;
-		let req_openHours = req.body.openHours;
+    const duplicate = await Shop.findOne({
+        name, 'address.country': address.country, 'address.city': address.city,
+        'address.postCode': address.postCode, 'address.streetName': address.streetName,
+        'address.streetNumber': address.streetNumber, removedAt: ''
+    })
+        .lean()
+        .exec();
 
-		const newShop = new Shop({
-			name: req_name,
-			address: req_address,
-			flavors: req_flavors,
-			openHours: req_openHours,
-			ownerId: ownerId,
-		});
+    if (duplicate) {
+        return res.status(400).json(sendResponse(false, 'Shop already exists'));
+    }
 
-		console.log('newShop', newShop);
+    employees.forEach(async employee => {
+        let user = await User.findOne({ email: employee.email }).exec();
+        let userShops = user.shops;
 
-		await newShop.save();
-		res.json(sendResponse(true, 'New shop created', newShop));
-	} catch (e) {
-		console.log(e);
-		res.json(sendResponse(false, e));
-	}
-};
+        if (!user) {
+            return res.status(400).sendResponse(false, `You cannot add user with email: '${employee.email}', because he does not exist.`);
+        }
+
+        let userShop = userShops.find(s => s.id === doc._id);
+        if (userShops.includes(userShop) && employee.jobPosition === userShop.jobPosition) {
+            return res.status(400).sendResponse(false, `User with email '${employee.email}' was already added.`);
+        }
+    });
+
+    try {
+        const creator = req.user.id;
+        if (!req.user.roles.includes(roles.ADMIN) && 
+            !employees.includes(employees.find(e => e.email === req.user.email))) {
+            employees.push({ email: req.user.email, jobPosition: roles.OWNER });
+        }
+
+        const shop = new Shop({
+            name,
+            address,
+            openingHours,
+            flavors,
+            employees,
+            creator
+        });
+
+        await shop.save();
+        res.status(200).json(sendResponse(true, 'Shop created', shop));
+    } catch (err) {
+        res.status(400).json(sendResponse(false, err.message));
+    }
+}
 
 module.exports = addShop;

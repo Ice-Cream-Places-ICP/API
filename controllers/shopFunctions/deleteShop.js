@@ -1,36 +1,26 @@
-const orderComment = require('../../utils/orderComment.js');
 const sendResponse = require('../../utils/sendResponse.js');
-const jwt = require('jsonwebtoken');
-const Shop = require('../../models/shopModel.js');
-const User = require('../../models/userModel.js');
-const isOwnerOrAdmin = require('../../utils/isOwnerOrAdmin.js');
+const Shop = require('../../models/Shop');
+const mongoose = require('mongoose');
 
 const deleteShop = async (req, res) => {
-	orderComment('delete');
+    const _id = req.params.id;
+    if (!mongoose.isValidObjectId(_id)) {
+        return res.status(400).json(sendResponse(false, 'Invalid shop id'));
+    }
 
-	try {
-		let userId = jwt.decode(req.headers.token);
+    const shop = await Shop.findOne({ _id, removedAt: '' });
+    if (!shop) {
+        return res.status(400).json(sendResponse(false, 'Shop not found'))
+    }
 
-		if (!(await User.findById(userId))) {
-			throw "This user doesn't exist";
-		}
+    try {
+        shop.removedAt = new Date();
+        const result = await shop.save();
 
-		if (!(await isOwnerOrAdmin(userId))) {
-			throw "This user can't execute this order";
-		}
-
-		if (!(await Shop.findById(req.params.id))) {
-			throw "This shop doesn't exist";
-		}
-
-		await Shop.findByIdAndDelete(req.params.id);
-
-		console.log('Shop Deleted');
-		res.json(sendResponse(true, 'Shop Deleted'));
-	} catch (e) {
-		console.log(e);
-		res.json(sendResponse(false, e));
-	}
-};
+        res.status(200).json(sendResponse(true, `Shop '${result.name}' deleted`));
+    } catch (err) {
+        res.status(400).json(sendResponse(false, err.message));
+    }
+}
 
 module.exports = deleteShop;

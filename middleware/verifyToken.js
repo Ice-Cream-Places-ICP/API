@@ -15,7 +15,7 @@ const verifyToken = (req, res, next) => {
             if (err) {
                 return res.status(400).json(sendResponse(false, err.message));
             }
-            req.userId = decoded.user.id;
+            req.userId = decoded;
             next();
         }
     )
