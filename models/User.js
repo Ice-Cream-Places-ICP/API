@@ -22,6 +22,9 @@ const userSchema = mongoose.Schema({
 	}],
 	shops: [{
 		type: userShopSchema
+	}],
+	favoriteFlavors: [{
+		type: String
 	}]
 },
 	{
