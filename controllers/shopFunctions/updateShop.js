@@ -1,8 +1,11 @@
 const sendResponse = require('../../utils/sendResponse');
+const arePropertiesSame = require('../../utils/arePropertiesSame');
+const isAdmin = require('../../utils/isAdmin');
 const Shop = require('../../models/Shop');
 const User = require('../../models/User');
 const mongoose = require('mongoose');
 const { roles } = require('../../config/constants');
+const hasDuplicates = require('../../utils/hasDuplicates');
 
 const updateShop = async (req, res) => {
     const _id = req.params.id;
@@ -41,28 +44,41 @@ const updateShop = async (req, res) => {
         return res.status(400).json(sendResponse(false, 'Shop already exists'));
     }
 
-    if (JSON.stringify(employees) !== JSON.stringify(shop.employees)) { 
-        employees.forEach(async employee => {
-            let user = await User.findOne({ email: employee.email }).exec();
-            let userShops = user.shops;
+    if (hasDuplicates(employees)) {
+        return res.status(400).json(sendResponse(false, 'You have added duplicate employees'));
+    }
 
-            if (!employees.includes(employees.find(e => e.email === req.user.email))) {
-                return res.status(400).json(sendResponse(false, `As owner you cannot remove yourself from employee list`));
-            }
+    if (!arePropertiesSame(employees, shop.employees)) {
+        for (let employee of employees) {
+            let user = await User.findOne({ email: employee.email }).exec();
+            let userShops = user?.shops;
 
             if (!user) {
                 return res.status(400).json(sendResponse(false, `You cannot add user with email: '${employee.email}', because he does not exist`));
             }
 
-            let userShop = userShops.find(s => s.id === doc._id);
-            if (userShops.includes(userShop) && employee.jobPosition === userShop.jobPosition) {
-                return res.status(400).json(sendResponse(false, `User with email '${employee.email}' was already added`));
+            if (!employees.includes(employees.find(e => e.email === req.user.email)) && 
+                !isAdmin(req.user)) {
+                return res.status(400).json(sendResponse(false, `As owner you cannot remove yourself from employee list`));
             }
-        });
+
+            let userShop = userShops.find(s => s.id === shop._id.toString());
+            if (userShop) {
+                if (userShop.jobPosition === roles.OWNER) {
+                    return res.status(400).json(sendResponse('You cannot downgrade owners\'s job position'));
+                }
+                else {
+                    userShop.jobPosition = employee.jobPosition;
+                }
+            }
+
+            user.shops = userShops;
+            await user.save();
+        };
     }
 
     try {
-        if (!req.user.roles.includes(roles.ADMIN) && 
+        if (!req.user.roles.includes(roles.ADMIN) &&
             !employees.includes(employees.find(e => e.email === req.user.email))) {
             employees.push({ email: req.user.email, jobPosition: roles.OWNER });
         }

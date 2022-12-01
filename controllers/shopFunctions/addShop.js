@@ -1,6 +1,9 @@
 const sendResponse = require('../../utils/sendResponse.js');
+const arePropertiesSame = require('../../utils/arePropertiesSame');
 const Shop = require('../../models/Shop');
+const User = require('../../models/User');
 const { roles } = require('../../config/constants');
+const hasDuplicates = require('../../utils/hasDuplicates.js');
 
 const addShop = async (req, res) => {
     let {
@@ -28,23 +31,21 @@ const addShop = async (req, res) => {
         return res.status(400).json(sendResponse(false, 'Shop already exists'));
     }
 
-    employees.forEach(async employee => {
+    if (hasDuplicates(employees)) {
+        return res.status(400).json(sendResponse(false, 'You have added duplicate employees'));
+    }
+
+    for (let employee of employees) {
         let user = await User.findOne({ email: employee.email }).exec();
-        let userShops = user.shops;
 
         if (!user) {
-            return res.status(400).json(sendResponse(false, `You cannot add user with email: '${employee.email}', because he does not exist.`));
+            return res.status(400).json(sendResponse(false, `You cannot add user with email: '${employee.email}', because he does not exist`));
         }
-
-        let userShop = userShops.find(s => s.id === doc._id);
-        if (userShops.includes(userShop) && employee.jobPosition === userShop.jobPosition) {
-            return res.status(400).json(sendResponse(false, `User with email '${employee.email}' was already added.`));
-        }
-    });
+    };
 
     try {
         const creator = req.user.id;
-        if (!req.user.roles.includes(roles.ADMIN) && 
+        if (!req.user.roles.includes(roles.ADMIN) &&
             !employees.includes(employees.find(e => e.email === req.user.email))) {
             employees.push({ email: req.user.email, jobPosition: roles.OWNER });
         }

@@ -44,7 +44,7 @@ shopSchema.pre('save', async function () {
 })
 
 shopSchema.post('save', async function (doc) {
-	if (doc.removedAt !== undefined) { 
+	if (doc.removedAt !== undefined) {
 		doc.employees.forEach(async employee => {
 			let user = await doc.model('User').findOne({ email: employee.email }).exec();
 			let userShops = user.shops;
@@ -52,9 +52,8 @@ shopSchema.post('save', async function (doc) {
 
 			let userShop = userShops.find(s => s.id === doc._id.toString());
 			userShops.splice(user.shops.indexOf(userShop), 1);
-			
-			let jobPositions = new Set();
-			jobPositions.add(roles.DEFAULT);
+
+			let jobPositions = new Set([roles.DEFAULT]);
 			userShops.forEach(shop => {
 				jobPositions.add(shop.jobPosition);
 			});
@@ -73,20 +72,16 @@ shopSchema.post('save', async function (doc) {
 		});
 	}
 	else {
-		doc.employees.forEach(async employee => { 
+		doc.employees.forEach(async employee => {
 			let user = await doc.model('User').findOne({ email: employee.email }).exec();
 			let userShops = user.shops;
 			let userRoles = user.roles;
-			
-			let userShop = userShops.find(s => s.id === doc._id.toString());
-			if (userShops.includes(userShop) && employee.jobPosition !== userShop.jobPosition) {
-				userShop.jobPosition = employee.jobPosition;
-			} 
 
+			let userShop = userShops.find(s => s.id === doc._id.toString());
 			if (!userShops.includes(userShop)) {
 				userShops.push({ id: doc._id, jobPosition: employee.jobPosition });
 			}
-			
+
 			if (!userRoles.includes(employee.jobPosition)) {
 				userRoles.push(employee.jobPosition);
 			}
