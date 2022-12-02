@@ -7,10 +7,12 @@ const addShop = require('../controllers/shopFunctions/addShop');
 const updateShop = require('../controllers/shopFunctions/updateShop');
 const getAllShops = require('../controllers/shopFunctions/getAllShops');
 const getShopById = require('../controllers/shopFunctions/getShopById');
-const deleteShop = require('../controllers/shopFunctions/deleteShop');
+const updateFlavors = require('../controllers/shopFunctions/updateFlavors');
+const getFlavors = require('../controllers/shopFunctions/getFlavors');
 
 router.get('/', getAllShops);
 router.get('/:id', getShopById);
+router.get('/:id/flavors', getFlavors);
 
 router.use(verifyToken);
 router.use(getUserInfo);
@@ -27,10 +29,10 @@ router.patch(
     updateShop
 );
 
-router.delete(
-    '/:id', 
-    verifyRoles(roles.OWNER), 
-    deleteShop
-);
+router.patch(
+    '/:id/flavors',
+    verifyRoles(roles.OWNER, roles.EMPLOYEE),
+    updateFlavors
+)
 
 module.exports = router;
