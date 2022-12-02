@@ -5,6 +5,11 @@ const roles = {
     EMPLOYEE: 'employee'
 }
 
+const allowedOrigins = [
+    `http://localhost:${process.env.WEB_PORT}`
+]
+
 module.exports = { 
-    roles
+    roles,
+    allowedOrigins
 };
