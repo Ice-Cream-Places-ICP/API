@@ -9,6 +9,8 @@ const corsOptions = {
         }
     }, 
     creadentials: true, 
+    exposedHeaders: ['Content-Type', 'token'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     optionSuccessStatus: 200
 }
 
