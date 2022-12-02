@@ -9,7 +9,7 @@ const getUserInfo = async (req, res, next) => {
         return res.status(400).json(sendResponse(false, 'Access denied'));
     }
 
-    const user = await User.findById(req.userId).exec();
+    const user = await User.findById(req.userId).populate('shops.id').select('-password -createdAt -updatedAt -__v').exec()
     if (!user) {
         return res.status(400).json(sendResponse(false, 'Access denied'));
     }
