@@ -30,9 +30,12 @@ const userRegister = async (req, res) => {
 			return res.status(400).json(sendResponse(false, 'User already exists'));
 		}
 
+		const salt = await bcrypt.genSalt(10);
+		const hashedPassword = await bcrypt.hash(req_password, salt);
+
 		const newUser = new User({
 			email: req_email,
-			password: req_password,
+			password: hashedPassword,
 			roles: req_roles,
 		});
 

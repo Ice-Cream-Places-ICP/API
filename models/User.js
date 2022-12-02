@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
 const userShopSchema = require('./subdocuments/userShopSchema');
-const bcrypt = require('bcrypt');
 const { roles } = require('../config/constants');
 
 const userSchema = mongoose.Schema({
@@ -30,11 +28,6 @@ const userSchema = mongoose.Schema({
 	{
 		timestamps: true,
 	});
-
-userSchema.pre('save', async function () {
-	const salt = await bcrypt.genSalt(10);
-	this.password = await bcrypt.hash(this.password, salt);
-});
 
 userSchema.post('remove', async function (doc) {
 	const shops = await doc.model('Shop').find({ "employees.email": doc.email });
