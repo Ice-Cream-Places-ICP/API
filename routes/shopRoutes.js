@@ -9,6 +9,9 @@ const getAllShops = require('../controllers/shopFunctions/getAllShops');
 const getShopById = require('../controllers/shopFunctions/getShopById');
 const updateFlavors = require('../controllers/shopFunctions/updateFlavors');
 const getFlavors = require('../controllers/shopFunctions/getFlavors');
+const addReview = require('../controllers/shopFunctions/addReview');
+const deleteReview = require('../controllers/shopFunctions/deleteReview');
+const updateReview = require('../controllers/shopFunctions/updateReview');
 
 router.get('/', getAllShops);
 router.get('/:id', getShopById);
@@ -33,6 +36,24 @@ router.patch(
     '/:id/flavors',
     verifyRoles(roles.OWNER, roles.EMPLOYEE),
     updateFlavors
+)
+
+router.post(
+    '/:id/review',
+    verifyRoles(roles.DEFAULT),
+    addReview
+);
+
+router.delete(
+    '/:shopId/review/:reviewId',
+    verifyRoles(roles.DEFAULT),
+    deleteReview
+)
+
+router.patch(
+    '/:shopId/review/:reviewId',
+    verifyRoles(roles.DEFAULT),
+    updateReview
 )
 
 module.exports = router;

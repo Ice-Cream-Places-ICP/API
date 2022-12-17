@@ -4,6 +4,7 @@ const addressSchema = require('./subdocuments/addressSchema');
 const flavorSchema = require('./subdocuments/flavorSchema');
 const employeeSchema = require('./subdocuments/employeeSchema');
 const openingHoursSchema = require('./subdocuments/openingHours');
+const reviewSchema = require('./subdocuments/reviewSchema');
 const openingHoursOverflow = require('../utils/openingHoursOverflow');
 const { roles } = require('../config/constants');
 
@@ -25,6 +26,12 @@ const shopSchema = new Schema({
 	employees: [{
 		type: employeeSchema
 	}],
+	reviews: [{
+		type: reviewSchema
+	}],
+	rating: {
+		type: Number
+	},
 	creator: {
 		type: Schema.Types.ObjectId,
 		ref: 'User'
@@ -41,6 +48,11 @@ shopSchema.pre('save', async function () {
 	if (this.openingHours && openingHoursOverflow(this.openingHours)) {
 		throw new Error('Too many opening hours specified')
 	}
+
+	let ratings = []
+    this.reviews.forEach(r => ratings.push(r.rate));
+	const ratingsSum = ratings.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+    this.rating = !isNaN(ratingsSum / ratings.length) ? (ratingsSum / ratings.length) : 0;
 })
 
 shopSchema.post('save', async function (doc) {
