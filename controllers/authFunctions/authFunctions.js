@@ -62,9 +62,8 @@ const userLogin = async (req, res) => {
 			user._id.toString(),
 			process.env.TOKEN_SECRET
 		);
-
-		res.header('token', token);
-		res.status(200).json(sendResponse(true, 'Login Successfully'));
+		
+		res.status(200).json(sendResponse(true, 'Login Successfully', { token: token } ));
 	} catch (e) {
 		res.json(sendResponse(false, e));
 	}
