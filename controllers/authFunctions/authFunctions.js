@@ -3,16 +3,12 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const validator = require('validator');
 const sendResponse = require('../../utils/sendResponse.js');
+const { roles } = require('../../config/constants');
 
 const userRegister = async (req, res) => {
 	try {
 		let req_email = req.body.email;
 		let req_password = req.body.password;
-		let req_roles = req.body.roles;
-
-		if (!req_roles) {
-			req_roles = ['default'];
-		} 
 
 		if (!req_email || !req_password) {
 			return res.status(400).json(sendResponse(false, 'All fields are required'));
@@ -36,7 +32,7 @@ const userRegister = async (req, res) => {
 		const newUser = new User({
 			email: req_email,
 			password: hashedPassword,
-			roles: req_roles,
+			roles: [roles.DEFAULT]
 		});
 
 		await newUser.save();
