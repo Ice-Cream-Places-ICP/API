@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const userShopSchema = require('./subdocuments/userShopSchema');
-const { roles } = require('../config/constants');
+const { roles, userStatus } = require('../config/constants');
 
 const userSchema = mongoose.Schema({
 	email: {
@@ -12,6 +12,15 @@ const userSchema = mongoose.Schema({
 		type: String,
 		required: true,
 		minlength: 5,
+	},
+	status: {
+		type: String,
+		enum: [userStatus.PENDING, userStatus.ACTIVE],
+		default: userStatus.PENDING
+	},
+	confirmationCode: {
+		type: String,
+		unique: true
 	},
 	roles: [{
 		type: String,
