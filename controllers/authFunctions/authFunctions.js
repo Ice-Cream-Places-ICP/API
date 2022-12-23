@@ -3,7 +3,8 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const validator = require('validator');
 const sendResponse = require('../../utils/sendResponse.js');
-const { roles } = require('../../config/constants');
+const sendConfirmationEmail = require('../../utils/sendConfirmationEmail');
+const { roles, userStatus } = require('../../config/constants');
 
 const userRegister = async (req, res) => {
 	try {
@@ -29,13 +30,17 @@ const userRegister = async (req, res) => {
 		const salt = await bcrypt.genSalt(10);
 		const hashedPassword = await bcrypt.hash(req_password, salt);
 
+		const token = jwt.sign({email: req_email}, process.env.TOKEN_SECRET);
+
 		const newUser = new User({
 			email: req_email,
 			password: hashedPassword,
-			roles: [roles.DEFAULT]
+			roles: [roles.DEFAULT],
+			confirmationCode: token
 		});
 
 		await newUser.save();
+		sendConfirmationEmail(newUser.email, newUser.confirmationCode);
 
 		res.status(200).json(sendResponse(true, 'New user created'));
 	} catch (e) {
@@ -58,6 +63,10 @@ const userLogin = async (req, res) => {
 			return res.status(400).json(sendResponse(false, 'Invalid credentials'));
 		}
 
+		if (user.status !== userStatus.ACTIVE) {
+			return res.status(400).json(sendResponse(false, 'Verify your email before logging in'));
+		}
+
 		const token = await jwt.sign(
 			user._id.toString(),
 			process.env.TOKEN_SECRET
@@ -69,4 +78,25 @@ const userLogin = async (req, res) => {
 	}
 };
 
-module.exports = { userRegister, userLogin };
+const userVerify = async (req, res) => {
+	const confirmationCode = req.params.confirmationCode;
+	if (!confirmationCode) {
+		return res.status(400).json(sendResponse(false, 'Confirmation code required'));
+	}
+
+	const user = await User.findOne({ confirmationCode: confirmationCode }).exec();
+	if (!user) {
+		return res.status(400).json(sendResponse(false, 'Invalid confirmation code'));
+	}
+
+	if (user.status === userStatus.ACTIVE) {
+		return res.status(400).json(sendResponse(false, 'User email was already verified'));
+	}
+
+	user.status = userStatus.ACTIVE;
+	await user.save();
+
+	res.status(200).json(sendResponse(true, 'Email verified'));
+}
+
+module.exports = { userRegister, userLogin, userVerify };
