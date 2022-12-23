@@ -5,11 +5,17 @@ const roles = {
     EMPLOYEE: 'employee'
 }
 
+const userStatus = {
+    PENDING: 'pending',
+    ACTIVE: 'active',
+}
+
 const allowedOrigins = [
     `http://localhost:${process.env.WEB_PORT}`
 ]
 
 module.exports = { 
     roles,
-    allowedOrigins
+    allowedOrigins,
+    userStatus
 };
