@@ -19,4 +19,8 @@ app.use('/shops', shopRoutes);
 app.use('/users', userRoutes);
 app.use(errorHandler);
 
+app.get('/sample', (req, res) => {
+	res.send('Hello world');
+});
+
 module.exports = { app };
