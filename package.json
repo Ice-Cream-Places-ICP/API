@@ -3,12 +3,11 @@
   "version": "1.0.0",
   "description": "ice-cream-places-icp",
   "main": "index.js",
-    "engines": {
+  "engines": {
     "node": "18.x"
   },
   "scripts": {
     "dev": "nodemon server.js",
-    "server": "node server.js",
     "start": "node server.js",
     "test": "npx jest sequentialRunner"
   },

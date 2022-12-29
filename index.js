@@ -1,32 +1,33 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const errorHandler = require('./middleware/errorHandler');
-const requestLogger = require('./middleware/requestLogger');
-const mongoose = require('mongoose');
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const errorHandler = require("./middleware/errorHandler");
+const requestLogger = require("./middleware/requestLogger");
+const mongoose = require("mongoose");
 
-const corsOptions = require('./config/corsOptions');
-const authRouts = require('./routes/authRoutes');
-const shopRoutes = require('./routes/shopRoutes.js');
-const userRoutes = require('./routes/userRoutes.js');
+const corsOptions = require("./config/corsOptions");
+const authRouts = require("./routes/authRoutes");
+const shopRoutes = require("./routes/shopRoutes.js");
+const userRoutes = require("./routes/userRoutes.js");
 const app = express();
 
 //MIDDLEWARE
 app.use(requestLogger);
 app.use(express.json());
 app.use(cors(corsOptions));
-app.use('/auth', authRouts);
-app.use('/shops', shopRoutes);
-app.use('/users', userRoutes);
+app.use("/auth", authRouts);
+app.use("/shops", shopRoutes);
+app.use("/users", userRoutes);
+app.get("/sample", (req, res) => {
+  res.send("Hello world");
+});
 app.use(errorHandler);
 
 // DATABASE CONNECTION
 mongoose.connect(process.env.DB_CONNECTION, () => {
-	console.log('Database Connected');
+  console.log("Database Connected");
 });
 
-app.get('/sample', (req, res) => {
-	res.send('Hello world');
+app.listen(process.env.PORT, () => {
+  console.log(`Server up at port ${process.env.PORT}`);
 });
-
-module.exports = { app };
