@@ -11,7 +11,8 @@ const userStatus = {
 }
 
 const allowedOrigins = [
-    `http://localhost:${process.env.WEB_PORT}`
+    `http://localhost:${process.env.WEB_PORT}`,
+    'https://ice-cream-places-web.vercel.app/'
 ]
 
 module.exports = { 
