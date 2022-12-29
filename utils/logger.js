@@ -13,16 +13,16 @@ global.logger = winston.createLogger({
                 simple()
             ),
         }),
-        new winston.transports.File({
-            level: 'http',
-            filename: path.join(__dirname, '..', 'logs', 'logs.txt'),
-            format: combine(
-                timestamp({
-                    format: 'YYYY-MM-DD hh:mm:ss.SSS A',
-                }),
-                json()
-            )
-        })
+//         new winston.transports.File({
+//             level: 'http',
+//             filename: path.join(__dirname, '..', 'logs', 'logs.txt'),
+//             format: combine(
+//                 timestamp({
+//                     format: 'YYYY-MM-DD hh:mm:ss.SSS A',
+//                 }),
+//                 json()
+//             )
+//         })
     ],
 });
 
