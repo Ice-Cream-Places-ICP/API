@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const errorHandler = require('./middleware/errorHandler');
 const requestLogger = require('./middleware/requestLogger');
+const mongoose = require('mongoose');
 
 const corsOptions = require('./config/corsOptions');
 const authRouts = require('./routes/authRoutes');
@@ -18,6 +19,11 @@ app.use('/auth', authRouts);
 app.use('/shops', shopRoutes);
 app.use('/users', userRoutes);
 app.use(errorHandler);
+
+// DATABASE CONNECTION
+mongoose.connect(process.env.DB_CONNECTION, () => {
+	console.log('Database Connected');
+});
 
 app.get('/sample', (req, res) => {
 	res.send('Hello world');
