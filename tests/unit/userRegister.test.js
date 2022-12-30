@@ -1,5 +1,5 @@
 const request = require('supertest');
-const { app } = require('../../index');
+const app = require('../../app');
 const mongoose = require('mongoose');
 
 const userRegisterTest = () => describe('POST /auth/register', () => {
@@ -167,7 +167,6 @@ const userRegisterTest = () => describe('POST /auth/register', () => {
         });
 
         test('should contain "User already exists" json message inside body', async () => {
-            console.log(res.body);
             expect(res.body.message).toBe('User already exists');
         })
 

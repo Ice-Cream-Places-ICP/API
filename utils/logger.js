@@ -1,7 +1,6 @@
 const winston = require('winston');
-const path = require('path');
 
-const { combine, timestamp, json, colorize, simple } = winston.format;
+const { combine, colorize, simple } = winston.format;
 
 global.logger = winston.createLogger({
     levels: winston.config.npm.levels, 
@@ -13,16 +12,6 @@ global.logger = winston.createLogger({
                 simple()
             ),
         }),
-//         new winston.transports.File({
-//             level: 'http',
-//             filename: path.join(__dirname, '..', 'logs', 'logs.txt'),
-//             format: combine(
-//                 timestamp({
-//                     format: 'YYYY-MM-DD hh:mm:ss.SSS A',
-//                 }),
-//                 json()
-//             )
-//         })
     ],
 });
 

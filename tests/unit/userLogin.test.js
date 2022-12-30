@@ -1,8 +1,10 @@
 const request = require('supertest');
-const { app } = require('../../index');
+const app = require('../../app');
 const mongoose = require('mongoose');
 const User = require('../../models/User');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const { roles, userStatus } = require('../../config/constants');
 
 const userLoginTest = () => describe('POST /auth/login', () => {
     const validPassword = 'ABCdef1@';
@@ -14,10 +16,14 @@ const userLoginTest = () => describe('POST /auth/login', () => {
 
     beforeAll(async () => {
         mongoose.connect(process.env.TEST_DB_CONNECTION);
+        const salt = await bcrypt.genSalt(10);
+		const hashedPassword = await bcrypt.hash(validPassword, salt);
+
         const user = new User({
             email: validEmail,
-            password: validPassword,
-            type: 'default',
+            password: hashedPassword,
+            roles: roles.DEFAULT,
+            status: userStatus.ACTIVE
         });
 
         await user.save();
@@ -76,12 +82,12 @@ const userLoginTest = () => describe('POST /auth/login', () => {
                 })
         });
 
-        test('should return header containing token', async () => {
-            expect(res.header.token).toBeDefined();
+        test('should return body containing token', async () => {
+            expect(res.body.content.token).toBeDefined();
         })
 
         test('should return valid token', async () => {
-            const userId = jwt.decode(res.header.token).toString();
+            const userId = jwt.decode(res.body.content.token).toString();
             var user = User.findById(userId);
             expect(user).toBeDefined();
         })
