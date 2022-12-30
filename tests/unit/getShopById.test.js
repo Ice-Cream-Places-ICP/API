@@ -1,5 +1,5 @@
 const request = require('supertest');
-const { app } = require('../../index');
+const app = require('../../app');
 const mongoose = require('mongoose');
 const Shop = require('../../models/Shop');
 
@@ -20,7 +20,11 @@ const getShopByIdTest = () => describe('GET /shops/:id', () => {
                 city: "test",
                 postCode: "test",
                 streetName: "test",
-                streetNumber: "test"
+                streetNumber: "test",
+                location: {
+                    coordinates: [],
+                    type: "Point"
+                }
             },
             openingHours: [
                 {
@@ -37,6 +41,8 @@ const getShopByIdTest = () => describe('GET /shops/:id', () => {
                     available: true
                 }
             ],
+            rating: 0,
+            reviews: [],
             employees: [],
             createdAt: new Date(),
             updatedAt: new Date()
