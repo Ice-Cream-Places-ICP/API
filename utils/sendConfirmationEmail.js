@@ -10,7 +10,7 @@ const sendConfirmationEmail = (email, confirmationCode) => {
         <h1>Email Confirmation</h1>
         <div>
         <p>Welcome to Ice Cream Places! Please confirm your email by clicking on the following link</p>
-        <a href=${process.env.API_URL}/auth/confirm/${confirmationCode}> Click here</a>
+        <a href=${process.env.WEB_URL}/account/confirm/${confirmationCode}> Click here</a>
         </div>
         `
     });
