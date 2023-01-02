@@ -13,14 +13,10 @@ const deleteShop = async (req, res) => {
         return res.status(400).json(sendResponse(false, 'Shop not found'))
     }
 
-    try {
-        shop.removedAt = new Date();
-        const result = await shop.save();
+    shop.removedAt = new Date();
+    const result = await shop.save();
 
-        res.status(200).json(sendResponse(true, `Shop '${result.name}' deleted`));
-    } catch (err) {
-        res.status(400).json(sendResponse(false, err.message));
-    }
+    res.status(200).json(sendResponse(true, `Shop '${result.name}' deleted`));
 }
 
 module.exports = deleteShop;

@@ -7,6 +7,7 @@ const addShop = require('../controllers/shopFunctions/addShop');
 const updateShop = require('../controllers/shopFunctions/updateShop');
 const getAllShops = require('../controllers/shopFunctions/getAllShops');
 const getShopById = require('../controllers/shopFunctions/getShopById');
+const deleteShop = require('../controllers/shopFunctions/deleteShop');
 const updateFlavors = require('../controllers/shopFunctions/updateFlavors');
 const getFlavors = require('../controllers/shopFunctions/getFlavors');
 const addReview = require('../controllers/shopFunctions/addReview');
@@ -37,6 +38,12 @@ router.patch(
     verifyRoles(roles.OWNER, roles.EMPLOYEE),
     updateFlavors
 )
+
+router.delete(
+    '/:id', 
+    verifyRoles(roles.OWNER), 
+    deleteShop
+);
 
 router.post(
     '/:id/review',
