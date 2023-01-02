@@ -65,20 +65,18 @@ shopSchema.post('save', async function (doc) {
 			let userShop = userShops.find(s => s.id === doc._id.toString());
 			userShops.splice(user.shops.indexOf(userShop), 1);
 
-			let jobPositions = new Set([roles.DEFAULT]);
+			let updatedUserRoles = new Set([roles.DEFAULT]);
+			if (userRoles.includes(roles.ADMIN)) {
+				updatedUserRoles.add(roles.ADMIN);
+			}
+
 			userShops.forEach(shop => {
-				jobPositions.add(shop.jobPosition);
+				updatedUserRoles.add(shop.jobPosition);
 			});
 
-			jobPositions = Array.from(jobPositions);
-			userRoles.forEach(role => {
-				if (!jobPositions.includes(role)) {
-					let roleIndex = userRoles.indexOf(role);
-					userRoles.splice(roleIndex, 1);
-				}
-			})
+			updatedUserRoles = Array.from(updatedUserRoles);
 
-			user.roles = userRoles;
+			user.roles = updatedUserRoles;
 			user.shops = userShops;
 			await user.save();
 		});
