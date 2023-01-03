@@ -29,7 +29,7 @@ router.post(
 
 router.patch(
     '/:id', 
-    verifyRoles(roles.OWNER, roles.EMPLOYEE), 
+    verifyRoles(roles.OWNER), 
     updateShop
 );
 

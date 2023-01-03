@@ -1,8 +1,10 @@
 const sendResponse = require('../../utils/sendResponse');
+const getUserJobPosition = require('../../utils/getUserJobPosition');
 const hasDuplicates = require('../../utils/hasDuplicates');
 const Shop = require('../../models/Shop');
 const validator = require('validator');
 const mongoose = require('mongoose');
+const { roles } = require('../../config/constants');
 
 const updateFlavors = async (req, res) => {
     const flavors = req.body;
@@ -17,6 +19,13 @@ const updateFlavors = async (req, res) => {
     if (!shop) {
         return res.status(400).json(sendResponse(false, 'Shop not found'));
     }
+
+    const userJobPosition = getUserJobPosition(req.user.email, shop.employees);
+    if (userJobPosition !== roles.OWNER && 
+        userJobPosition !== roles.EMPLOYEE && 
+        !isAdmin(req.user)) {
+            return res.status(400).json(sendResponse(false, 'Access denied'));
+        } 
 
     if (hasDuplicates(flavors)) {
         return res.status(400).json(sendResponse(false, `Flavors list cannot have duplicates`));

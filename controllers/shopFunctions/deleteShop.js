@@ -1,4 +1,7 @@
-const sendResponse = require('../../utils/sendResponse.js');
+const sendResponse = require('../../utils/sendResponse');
+const isAdmin = require('../../utils/isAdmin');
+const getUserJobPosition = require('../../utils/getUserJobPosition');
+const { roles } = require('../../config/constants');
 const Shop = require('../../models/Shop');
 const mongoose = require('mongoose');
 
@@ -12,6 +15,11 @@ const deleteShop = async (req, res) => {
     if (!shop) {
         return res.status(400).json(sendResponse(false, 'Shop not found'))
     }
+
+    if (getUserJobPosition(req.user.email, shop.employees) !== roles.OWNER && 
+        !isAdmin(req.user)) {
+            return res.status(400).json(sendResponse(false, 'Access denied'));
+        } 
 
     shop.removedAt = new Date();
     const result = await shop.save();
