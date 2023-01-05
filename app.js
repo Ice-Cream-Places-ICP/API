@@ -19,7 +19,7 @@ app.use(requestLogger);
 app.use(cookieSession({
     maxAge: 5 * 60 * 60 * 1000,
     keys: [process.env.TOKEN_SECRET],
-    sameSite: none,
+    sameSite: "none",
     secure: true,
 }));
 app.use(passport.initialize());
