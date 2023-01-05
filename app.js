@@ -18,7 +18,7 @@ const app = express();
 app.use(requestLogger);
 app.use(cookieSession({
     maxAge: 5 * 60 * 1000,
-    secure: false,
+    secure: true,
     sameSite: 'none',
     keys: [process.env.TOKEN_SECRET]
 }));
