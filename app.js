@@ -21,6 +21,7 @@ app.use(cookieSession({
     keys: [process.env.TOKEN_SECRET],
     sameSite: "none",
     secure: true,
+    domain: "ice-cream-places-web.vercel.app"
 }));
 app.use(passport.initialize());
 app.use(passport.session());
