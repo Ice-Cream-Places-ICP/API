@@ -18,6 +18,7 @@ const app = express();
 app.use(requestLogger);
 app.use(cookieSession({
     maxAge: 5 * 60 * 1000,
+    secure: false,
     keys: [process.env.TOKEN_SECRET]
 }));
 app.use(passport.initialize());
