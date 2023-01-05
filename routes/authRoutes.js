@@ -21,8 +21,12 @@ router.get('/google',
 	})
 );
 router.get('/google/redirect',
-	passport.authenticate('google'),
-	passportLogin
+	passport.authenticate('google', {
+		successRedirect: process.env.WEB_URL + '/google/success',
+		failureRedirect: '/google/failure',
+	})
 );
+router.get('/google/success', passportLogin);
+router.get('/google/failure', passportLogin);
 
 module.exports = router;

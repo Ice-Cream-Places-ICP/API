@@ -3,6 +3,8 @@ const express = require("express");
 const cors = require("cors");
 const errorHandler = require("./middleware/errorHandler");
 const requestLogger = require("./middleware/requestLogger");
+const cookieSession = require('cookie-session');
+const passport = require('passport');
 const passportSetup = require('./config/passport-setup');
 
 const corsOptions = require("./config/corsOptions");
@@ -14,6 +16,11 @@ const app = express();
 
 //MIDDLEWARE
 app.use(requestLogger);
+app.use(cookieSession({
+    keys: [process.env.TOKEN_SECRET]
+}));
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(express.json());
 app.use(cors(corsOptions));
 app.use("/auth", authRouts);
