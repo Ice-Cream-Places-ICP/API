@@ -15,7 +15,8 @@ passport.deserializeUser((id, done) => {
 
 passport.use(
     new GoogleStrategy({
-        callbackURL: '/auth/google/redirect',
+//         callbackURL: '/auth/google/redirect',
+        callbackURL: 'https://ice-cream-places-api.vercel.app/auth/google/redirect',
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET
     }, async (accessToken, refreshToken, profile, done) => {
