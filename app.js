@@ -21,6 +21,9 @@ app.use(
     name: "session",
     maxAge: 24 * 60 * 1000,
     keys: [process.env.TOKEN_SECRET],
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
   })
 );
 
