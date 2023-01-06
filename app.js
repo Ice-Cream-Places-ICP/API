@@ -17,22 +17,10 @@ const app = express();
 
 //MIDDLEWARE
 app.use(requestLogger);
-// app.use(
-//   cookieSession({
-//     maxAge: 5 * 60 * 60 * 1000,
-//     keys: [process.env.TOKEN_SECRET],
-//     sameSite: "none",
-//     secure: true,
-//     domain: "ice-cream-places-web.vercel.app",
-//   })
-// );
-
 app.use(
-  session({
-    secret: "keyboard cat",
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: true },
+  cookieSession({
+    maxAge: 24 * 60 * 1000,
+    keys: [process.env.TOKEN_SECRET],
   })
 );
 
