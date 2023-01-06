@@ -4,6 +4,7 @@ const cors = require("cors");
 const errorHandler = require("./middleware/errorHandler");
 const requestLogger = require("./middleware/requestLogger");
 const cookieSession = require("cookie-session");
+const session = require("express-session");
 const passport = require("passport");
 const passportSetup = require("./config/passport-setup");
 
@@ -16,15 +17,25 @@ const app = express();
 
 //MIDDLEWARE
 app.use(requestLogger);
+// app.use(
+//   cookieSession({
+//     maxAge: 5 * 60 * 60 * 1000,
+//     keys: [process.env.TOKEN_SECRET],
+//     sameSite: "none",
+//     secure: true,
+//     domain: "ice-cream-places-web.vercel.app",
+//   })
+// );
+
 app.use(
-  cookieSession({
-    maxAge: 5 * 60 * 60 * 1000,
-    keys: [process.env.TOKEN_SECRET],
-    sameSite: "none",
-    secure: true,
-    domain: "ice-cream-places-web.vercel.app",
+  session({
+    secret: "keyboard cat",
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: true },
   })
 );
+
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.json());
