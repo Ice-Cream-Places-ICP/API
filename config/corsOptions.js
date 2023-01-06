@@ -10,7 +10,7 @@ const corsOptions = {
     }, 
     credentials: true, 
     methods: ['GET', 'POST', 'HEAD', 'PUT', 'PATCH', 'DELETE'],
-    exposedHeaders: ['Content-Type'],
+    exposedHeaders: ['Content-Type', 'set-cookie'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     optionSuccessStatus: 200
 }
