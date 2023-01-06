@@ -18,7 +18,7 @@ passport.use(
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL:
-        "https://ice-cream-places-api.vercel.app/auth/google/callback",
+        "https://ice-cream-places-api.vercel.app/auth/google/redirect",
     },
     function (accessToken, refreshToken, profile, done) {
       done(null, profile);
