@@ -1,12 +1,29 @@
-const app = require('./app');
-const mongoose = require("mongoose");
+require("dotenv").config();
+const cookieSession = require("cookie-session");
+const express = require("express");
+const cors = require("cors");
+const passportSetup = require("./passport");
+const passport = require("passport");
+const authRoute = require("./routes/auth");
+const app = express();
 
-// DATABASE CONNECTION
-mongoose.connect(process.env.DB_CONNECTION, () => {
-    console.log("Database Connected");
-});
+app.use(
+  cookieSession({ name: "session", keys: ["lama"], maxAge: 24 * 60 * 60 * 100 })
+);
 
-// SERVER LISTENING
-app.listen(process.env.PORT, () => {
-    console.log(`Server up at port ${process.env.PORT}`);
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use(
+  cors({
+    origin: "https://ice-cream-places-web.vercel.app",
+    methods: "GET,POST,PUT,DELETE",
+    credentials: true,
+  })
+);
+
+app.use("/auth", authRoute);
+
+app.listen("5000", () => {
+  console.log("Server is running!");
 });
