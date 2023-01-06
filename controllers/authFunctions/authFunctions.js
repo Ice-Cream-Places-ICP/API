@@ -1,120 +1,142 @@
-const User = require('../../models/User');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
-const validator = require('validator');
-const sendResponse = require('../../utils/sendResponse.js');
-const sendConfirmationEmail = require('../../utils/sendConfirmationEmail');
-const { roles, userStatus, authMethod } = require('../../config/constants');
+const User = require("../../models/User");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const validator = require("validator");
+const sendResponse = require("../../utils/sendResponse.js");
+const sendConfirmationEmail = require("../../utils/sendConfirmationEmail");
+const { roles, userStatus, authMethod } = require("../../config/constants");
 
 const userRegister = async (req, res) => {
-	try {
-		let req_email = req.body.email;
-		let req_password = req.body.password;
+  try {
+    let req_email = req.body.email;
+    let req_password = req.body.password;
 
-		if (!req_email || !req_password) {
-			return res.status(400).json(sendResponse(false, 'All fields are required'));
-		}
+    if (!req_email || !req_password) {
+      return res
+        .status(400)
+        .json(sendResponse(false, "All fields are required"));
+    }
 
-		if (!validator.isEmail(req_email)) {
-			return res.status(400).json(sendResponse(false, 'Invalid email'));
-		}
+    if (!validator.isEmail(req_email)) {
+      return res.status(400).json(sendResponse(false, "Invalid email"));
+    }
 
-		if (!validator.isStrongPassword(req_password)) {
-			return res.status(400).json(sendResponse(false, 'Password must contain minimum 8 letters containing at least - 1 lowercase, 1 uppercase, 1 number, 1 symbol'));
-		}
+    if (!validator.isStrongPassword(req_password)) {
+      return res
+        .status(400)
+        .json(
+          sendResponse(
+            false,
+            "Password must contain minimum 8 letters containing at least - 1 lowercase, 1 uppercase, 1 number, 1 symbol"
+          )
+        );
+    }
 
-		if (await User.findOne({ email: req_email })) {
-			return res.status(400).json(sendResponse(false, 'User already exists'));
-		}
+    if (await User.findOne({ email: req_email })) {
+      return res.status(400).json(sendResponse(false, "User already exists"));
+    }
 
-		const salt = await bcrypt.genSalt(10);
-		const hashedPassword = await bcrypt.hash(req_password, salt);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(req_password, salt);
 
-		const token = jwt.sign({ email: req_email }, process.env.TOKEN_SECRET);
+    const token = jwt.sign({ email: req_email }, process.env.TOKEN_SECRET);
 
-		const newUser = new User({
-			email: req_email,
-			password: hashedPassword,
-			roles: [roles.DEFAULT],
-			confirmationCode: token,
-			authType: authMethod.EMAIL
-		});
+    const newUser = new User({
+      email: req_email,
+      password: hashedPassword,
+      roles: [roles.DEFAULT],
+      confirmationCode: token,
+      authType: authMethod.EMAIL,
+    });
 
-		await newUser.save();
-		sendConfirmationEmail(newUser.email, newUser.confirmationCode);
+    await newUser.save();
+    sendConfirmationEmail(newUser.email, newUser.confirmationCode);
 
-		res.status(200).json(sendResponse(true, 'New user created'));
-	} catch (e) {
-		res.json(sendResponse(false, e));
-	}
+    res.status(200).json(sendResponse(true, "New user created"));
+  } catch (e) {
+    res.json(sendResponse(false, e));
+  }
 };
 
 const userLogin = async (req, res) => {
-	try {
-		let req_email = req.body.email;
-		let req_password = req.body.password;
+  try {
+    let req_email = req.body.email;
+    let req_password = req.body.password;
 
-		if (!req_email || !req_password) {
-			return res.status(400).json(sendResponse(false, 'All fields are required'));
-		}
+    if (!req_email || !req_password) {
+      return res
+        .status(400)
+        .json(sendResponse(false, "All fields are required"));
+    }
 
-		const user = await User.findOne({ email: req_email });
+    const user = await User.findOne({ email: req_email });
 
-		if (user.authType !== authMethod.EMAIL) {
-			return res.status(400).json(sendResponse(false, 'This account can only be logged into with email'));
-		}
+    if (user.authType !== authMethod.EMAIL) {
+      return res
+        .status(400)
+        .json(
+          sendResponse(false, "This account can only be logged into with email")
+        );
+    }
 
-		if (!user || !(await bcrypt.compare(req_password, user.password))) {
-			return res.status(400).json(sendResponse(false, 'Invalid credentials'));
-		}
+    if (!user || !(await bcrypt.compare(req_password, user.password))) {
+      return res.status(400).json(sendResponse(false, "Invalid credentials"));
+    }
 
-		if (user.status !== userStatus.ACTIVE) {
-			return res.status(400).json(sendResponse(false, 'Verify your email before logging in'));
-		}
+    if (user.status !== userStatus.ACTIVE) {
+      return res
+        .status(400)
+        .json(sendResponse(false, "Verify your email before logging in"));
+    }
 
-		const token = await jwt.sign(
-			user._id.toString(),
-			process.env.TOKEN_SECRET
-		);
+    const token = await jwt.sign(user._id.toString(), process.env.TOKEN_SECRET);
 
-		res.status(200).json(sendResponse(true, 'Login Successfully', { token: token }));
-	} catch (e) {
-		res.json(sendResponse(false, e));
-	}
+    res
+      .status(200)
+      .json(sendResponse(true, "Login Successfully", { token: token }));
+  } catch (e) {
+    res.json(sendResponse(false, e));
+  }
 };
 
 const userVerify = async (req, res) => {
-	const confirmationCode = req.params.confirmationCode;
-	if (!confirmationCode) {
-		return res.status(400).json(sendResponse(false, 'Confirmation code required'));
-	}
+  const confirmationCode = req.params.confirmationCode;
+  if (!confirmationCode) {
+    return res
+      .status(400)
+      .json(sendResponse(false, "Confirmation code required"));
+  }
 
-	const user = await User.findOne({ confirmationCode: confirmationCode }).exec();
-	if (!user) {
-		return res.status(400).json(sendResponse(false, 'Invalid confirmation code'));
-	}
+  const user = await User.findOne({
+    confirmationCode: confirmationCode,
+  }).exec();
+  if (!user) {
+    return res
+      .status(400)
+      .json(sendResponse(false, "Invalid confirmation code"));
+  }
 
-	if (user.status === userStatus.ACTIVE) {
-		return res.status(400).json(sendResponse(false, 'User email was already verified'));
-	}
+  if (user.status === userStatus.ACTIVE) {
+    return res
+      .status(400)
+      .json(sendResponse(false, "User email was already verified"));
+  }
 
-	user.status = userStatus.ACTIVE;
-	await user.save();
+  user.status = userStatus.ACTIVE;
+  await user.save();
 
-	res.status(200).json(sendResponse(true, 'Email verified'));
-}
+  res.status(200).json(sendResponse(true, "Email verified"));
+};
 
 const passportLogin = (req, res) => {
-	if (typeof err !== 'undefined') {
-		return res.status(400).json(sendResponse(false, err.message, { token: token }));
-	}
-
-	const token = jwt.sign(
-		req.user.id.toString(),
-		process.env.TOKEN_SECRET
-	);
-
-	res.status(200).json(sendResponse(true, 'Login Successfully', { token: token }));
-}
+  if (req.user) {
+    const token = jwt.sign(req.user.id.toString(), process.env.TOKEN_SECRET);
+    res
+      .status(200)
+      .json(sendResponse(true, "Login Successfully", { token: token }));
+  } else {
+    res.status(200).json(sendResponse(false, "xD"));
+  }
+};
 
 module.exports = { userRegister, userLogin, userVerify, passportLogin };

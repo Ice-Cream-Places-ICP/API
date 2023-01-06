@@ -4,7 +4,6 @@ const cors = require("cors");
 const errorHandler = require("./middleware/errorHandler");
 const requestLogger = require("./middleware/requestLogger");
 const cookieSession = require("cookie-session");
-const session = require("express-session");
 const passport = require("passport");
 const passportSetup = require("./config/passport-setup");
 
@@ -19,10 +18,9 @@ const app = express();
 app.use(requestLogger);
 app.use(
   cookieSession({
+    name: "session",
     maxAge: 24 * 60 * 1000,
     keys: [process.env.TOKEN_SECRET],
-    secure: true,
-    sameSite: "none",
   })
 );
 
@@ -30,6 +28,13 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.json());
 app.use(cors(corsOptions));
+// app.use(
+//   cors({
+//     origin: "http://localhost:3000",
+//     methods: "GET,POST,PUT,DELETE",
+//     credentials: true,
+//   })
+// );
 app.use("/auth", authRouts);
 app.use("/shops", shopRoutes);
 app.use("/users", userRoutes);
