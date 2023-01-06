@@ -8,7 +8,14 @@ const authRoute = require("./routes/auth");
 const app = express();
 
 app.use(
-  cookieSession({ name: "session", keys: ["lama"], maxAge: 24 * 60 * 60 * 100 })
+  cookieSession({
+    name: "session",
+    keys: ["lama"],
+    maxAge: 24 * 60 * 60 * 100,
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+  })
 );
 
 app.use(passport.initialize());
