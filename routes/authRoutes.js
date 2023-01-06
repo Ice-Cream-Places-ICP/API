@@ -22,7 +22,8 @@ router.get(
 router.get(
   "/google/redirect",
   passport.authenticate("google", {
-    successRedirect: "https://ice-cream-places-web.vercel.app/",
+    successRedirect:
+      "https://ice-cream-places-web.vercel.app/login/google/success/",
     failureRedirect: "/google/failure",
   })
 );
