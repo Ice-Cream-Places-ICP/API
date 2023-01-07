@@ -5,6 +5,7 @@ const {
 	userVerify,
 	passportLogin,
 } = require('../controllers/authFunctions/authFunctions.js');
+const loginErrorRedirect = require('../middleware/loginErrorRedirect');
 const passport = require('passport');
 
 const router = express.Router();
@@ -22,6 +23,7 @@ router.get('/google',
 );
 router.get('/google/redirect',
 	passport.authenticate('google'),
+	loginErrorRedirect,
 	passportLogin
 );
 router.get('/facebook',
@@ -34,6 +36,7 @@ router.get('/facebook',
 );
 router.get('/facebook/redirect',
 	passport.authenticate('facebook'),
+	loginErrorRedirect,
 	passportLogin
 );
 

@@ -105,12 +105,8 @@ const userVerify = async (req, res) => {
 }
 
 const passportLogin = (req, res) => {
-	if (!req?.user?.id || err !== 'undefined') { 
-		res.redirect(`${process.env.WEB_URL}/login/failed`);
-	}
-
 	const token = jwt.sign(
-		req.user.id.toString(),
+		req?.user?.id.toString(),
 		process.env.TOKEN_SECRET
 	);
 	
