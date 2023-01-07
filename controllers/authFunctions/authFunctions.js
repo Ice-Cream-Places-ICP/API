@@ -105,16 +105,16 @@ const userVerify = async (req, res) => {
 }
 
 const passportLogin = (req, res) => {
-	if (typeof err !== 'undefined') {
-		return res.status(400).json(sendResponse(false, err.message, { token: token }));
+	if (!req?.user?.id) { 
+		res.redirect(`${process.env.WEB_URL}/login/failed`);
 	}
 
 	const token = jwt.sign(
 		req.user.id.toString(),
 		process.env.TOKEN_SECRET
 	);
-
-	res.status(200).json(sendResponse(true, 'Login Successfully', { token: token }));
+	
+	res.redirect(`${process.env.WEB_URL}/login/success/${token}`);
 }
 
 module.exports = { userRegister, userLogin, userVerify, passportLogin };
