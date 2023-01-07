@@ -25,8 +25,7 @@ const userSchema = mongoose.Schema({
 		default: userStatus.PENDING
 	},
 	confirmationCode: {
-		type: String,
-		unique: true
+		type: String
 	},
 	roles: {
 		type: [String],
