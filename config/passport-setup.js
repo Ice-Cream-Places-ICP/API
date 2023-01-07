@@ -44,7 +44,7 @@ passport.use(
 
 passport.use(
     new FacebookStrategy({
-        callbackURL: '/auth/facebook/redirect',
+        callbackURL: `${process.env.API_URL}/auth/facebook/redirect`,
         clientID: process.env.FACEBOOK_CLIENT_ID,
         clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
         profileFields: ['id', 'email']
