@@ -53,7 +53,7 @@ passport.use(
         let user = await User.findOne({ facebookId: profile.id }).exec();
         
         if (!user) {
-            const email = profile.email;
+            const email = profile._json.email;
             const facebookId = profile.id;
             const authType = authMethod.FACEBOOK;
             const status = userStatus.ACTIVE;
