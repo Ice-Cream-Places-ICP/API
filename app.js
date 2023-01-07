@@ -4,7 +4,6 @@ const cors = require("cors");
 const errorHandler = require("./middleware/errorHandler");
 const requestLogger = require("./middleware/requestLogger");
 const passportSetup = require('./config/passport-setup');
-
 const corsOptions = require("./config/corsOptions");
 const authRouts = require("./routes/authRoutes");
 const shopRoutes = require("./routes/shopRoutes.js");
