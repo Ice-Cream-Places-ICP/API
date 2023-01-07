@@ -4,13 +4,7 @@ const User = require('../models/User');
 const { authMethod, userStatus } = require('./constants');
 
 passport.serializeUser((user, done) => {
-    done(null, user.id);
-})
-
-passport.deserializeUser((id, done) => {
-    User.findById(id).then((user) => {
-        done(null, user);
-    })
+    done(null, user);
 })
 
 passport.use(
