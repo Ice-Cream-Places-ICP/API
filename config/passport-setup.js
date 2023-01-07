@@ -53,6 +53,11 @@ passport.use(
         let user = await User.findOne({ facebookId: profile.id }).exec();
         
         if (!user) {
+            if (!profile._json?.email) {
+                const err = new Error('Sign up with Facebook requires email address to be set');
+                return done(err);
+            }
+
             const email = profile._json.email;
             const facebookId = profile.id;
             const authType = authMethod.FACEBOOK;

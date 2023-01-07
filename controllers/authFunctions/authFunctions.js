@@ -105,7 +105,7 @@ const userVerify = async (req, res) => {
 }
 
 const passportLogin = (req, res) => {
-	if (!req?.user?.id) { 
+	if (!req?.user?.id || err !== 'undefined') { 
 		res.redirect(`${process.env.WEB_URL}/login/failed`);
 	}
 
