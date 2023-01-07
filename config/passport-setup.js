@@ -1,5 +1,6 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20');
+const FacebookStrategy = require('passport-facebook');
 const User = require('../models/User');
 const { authMethod, userStatus } = require('./constants');
 
@@ -33,6 +34,42 @@ passport.use(
         else {
             if (user.authType !== authMethod.GOOGLE) {
                 const err = new Error('This account can only be logged into with Google');
+                return done(err);
+            }
+        }
+
+        done(null, user);
+    })
+)
+
+passport.use(
+    new FacebookStrategy({
+        callbackURL: '/auth/facebook/redirect',
+        clientID: process.env.FACEBOOK_CLIENT_ID,
+        clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+        profileFields: ['id', 'email']
+    }, async (accessToken, refreshToken, profile, done) => {
+        console.log(profile);
+        let user = await User.findOne({ facebookId: profile.id }).exec();
+        
+        if (!user) {
+            const email = profile.email;
+            const facebookId = profile.id;
+            const authType = authMethod.FACEBOOK;
+            const status = userStatus.ACTIVE;
+
+            user = new User({
+                email,
+                facebookId,
+                authType,
+                status
+            });
+
+            user = await user.save();
+        }
+        else {
+            if (user.authType !== authMethod.FACEBOOK) {
+                const err = new Error('This account can only be logged into with Facebook');
                 return done(err);
             }
         }
