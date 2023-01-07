@@ -17,7 +17,8 @@ const allowedOrigins = [
 
 const authMethod = {
   EMAIL: 'email', 
-  GOOGLE: 'google'
+  GOOGLE: 'google',
+  FACEBOOK: 'facebook'
 }
 
 module.exports = {
