@@ -22,6 +22,12 @@ passport.use(
             const authType = authMethod.GOOGLE;
             const status = userStatus.ACTIVE;
 
+            const duplicate = await User.findOne({ email: email }).exec();
+            if (duplicate) {
+                const err = new Error('User already exists');
+                return done(err);
+            }
+
             user = new User({
                 email,
                 googleId,
@@ -49,19 +55,24 @@ passport.use(
         clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
         profileFields: ['id', 'email']
     }, async (accessToken, refreshToken, profile, done) => {
-        console.log(profile);
         let user = await User.findOne({ facebookId: profile.id }).exec();
         
         if (!user) {
-            if (!profile._json?.email) {
+            const email = profile._json?.email;
+            const facebookId = profile.id;
+            const authType = authMethod.FACEBOOK;
+            const status = userStatus.ACTIVE;
+
+            if (!email) {
                 const err = new Error('Sign up with Facebook requires email address to be set');
                 return done(err);
             }
 
-            const email = profile._json.email;
-            const facebookId = profile.id;
-            const authType = authMethod.FACEBOOK;
-            const status = userStatus.ACTIVE;
+            const duplicate = await User.findOne({ email: email }).exec();
+            if (duplicate) {
+                const err = new Error('User already exists');
+                return done(err);
+            }
 
             user = new User({
                 email,
