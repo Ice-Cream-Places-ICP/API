@@ -9,7 +9,7 @@ passport.serializeUser((user, done) => {
 
 passport.use(
     new GoogleStrategy({
-        callbackURL: '/auth/google/redirect',
+        callbackURL: `${process.env.API_URL}/auth/google/redirect`,
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET
     }, async (accessToken, refreshToken, profile, done) => {
