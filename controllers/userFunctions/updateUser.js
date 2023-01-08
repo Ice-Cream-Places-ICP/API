@@ -2,25 +2,30 @@ const validator = require('validator');
 const sendResponse = require('../../utils/sendResponse');
 const hasDuplicates = require('../../utils/hasDuplicates');
 const isAdmin = require('../../utils/isAdmin');
+const areProportiesSame = require('../../utils/arePropertiesSame');
+const { userStatus } = require('../../config/constants');
 const User = require('../../models/User');
 const mongoose = require('mongoose');
 
 const updateUser = async (req, res) => {
-    const { favoriteFlavors } = req.body;
-    const _id = req?.params.id;
-    let user = req.user;
+    const { 
+        favoriteFlavors,
+        status
+     } = req.body;
+    const id = req?.params.id;
+    let updatedUser = req.user;
 
-    if (_id) {
-        if (!mongoose.isValidObjectId(_id)) {
+    if (id) {
+        if (!mongoose.isValidObjectId(id)) {
             return res.status(400).json(sendResponse(false, 'Invalid user id'));
         }
 
-        if (_id !== user._id.toString()) {
-            if (!isAdmin(user)) {
+        if (id !== req.user.id.toString()) {
+            if (!isAdmin(req.user) && id !== req.user.id.toString()) {
                 return res.status(400).json(sendResponse(false, 'Access denied'));
             }
             else {
-                user = await User.findById(_id).populate('shops.id').select('-password -createdAt -updatedAt -__v').exec();
+                updatedUser = await User.findById(id).populate('shops.id').select('-password -createdAt -updatedAt -__v').exec();
             }
         }
     }
@@ -35,11 +40,24 @@ const updateUser = async (req, res) => {
         }
     }
 
-    req.user.favoriteFlavors = favoriteFlavors;
-    req.user.updatedAt = new Date();
+    if (isAdmin(req.user)) {
+        const userStatusArr = Array.from(Object.values(userStatus));
+        if (!userStatusArr.includes(status)) {
+            return res.status(400).json(sendResponse(false, `Status '${status}' is incorrect`));
+        }
+        updatedUser.status = status;
+    }
+    else {
+        if (!areProportiesSame(updatedUser.status, status)) {
+            return res.status(400).json(sendResponse(false, 'You cannot update your own status'));
+        }
+    }
 
-    await req.user.save();
-    return res.status(200).json(sendResponse(true, 'User profile was updated', req.user));
+    updatedUser.favoriteFlavors = favoriteFlavors;
+    updatedUser.updatedAt = new Date();
+
+    await updatedUser.save();
+    return res.status(200).json(sendResponse(true, 'User profile was updated', updatedUser));
 }
 
 module.exports = updateUser;
