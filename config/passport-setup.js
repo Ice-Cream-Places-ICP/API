@@ -1,5 +1,6 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20');
+const FacebookStrategy = require('passport-facebook');
 const User = require('../models/User');
 const { authMethod, userStatus } = require('./constants');
 
@@ -21,6 +22,12 @@ passport.use(
             const authType = authMethod.GOOGLE;
             const status = userStatus.ACTIVE;
 
+            const duplicate = await User.findOne({ email: email }).exec();
+            if (duplicate) {
+                const err = new Error('User already exists');
+                return done(err);
+            }
+
             user = new User({
                 email,
                 googleId,
@@ -33,6 +40,52 @@ passport.use(
         else {
             if (user.authType !== authMethod.GOOGLE) {
                 const err = new Error('This account can only be logged into with Google');
+                return done(err);
+            }
+        }
+
+        done(null, user);
+    })
+)
+
+passport.use(
+    new FacebookStrategy({
+        callbackURL: `${process.env.API_URL}/auth/facebook/redirect`,
+        clientID: process.env.FACEBOOK_CLIENT_ID,
+        clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+        profileFields: ['id', 'email']
+    }, async (accessToken, refreshToken, profile, done) => {
+        let user = await User.findOne({ facebookId: profile.id }).exec();
+        
+        if (!user) {
+            const email = profile._json?.email;
+            const facebookId = profile.id;
+            const authType = authMethod.FACEBOOK;
+            const status = userStatus.ACTIVE;
+
+            if (!email) {
+                const err = new Error('Sign up with Facebook requires email address to be set');
+                return done(err);
+            }
+
+            const duplicate = await User.findOne({ email: email }).exec();
+            if (duplicate) {
+                const err = new Error('User already exists');
+                return done(err);
+            }
+
+            user = new User({
+                email,
+                facebookId,
+                authType,
+                status
+            });
+
+            user = await user.save();
+        }
+        else {
+            if (user.authType !== authMethod.FACEBOOK) {
+                const err = new Error('This account can only be logged into with Facebook');
                 return done(err);
             }
         }

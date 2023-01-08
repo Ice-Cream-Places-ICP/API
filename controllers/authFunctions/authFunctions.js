@@ -61,7 +61,7 @@ const userLogin = async (req, res) => {
 		const user = await User.findOne({ email: req_email });
 
 		if (user.authType !== authMethod.EMAIL) {
-			return res.status(400).json(sendResponse(false, 'This account can only be logged into with email'));
+			return res.status(400).json(sendResponse(false, "This account can't be signed in with email"));
 		}
 
 		if (!user || !(await bcrypt.compare(req_password, user.password))) {
@@ -105,12 +105,8 @@ const userVerify = async (req, res) => {
 }
 
 const passportLogin = (req, res) => {
-	if (!req?.user?.id) { 
-		res.redirect(`${process.env.WEB_URL}/login/failed`);
-	}
-
 	const token = jwt.sign(
-		req.user.id.toString(),
+		req?.user?.id.toString(),
 		process.env.TOKEN_SECRET
 	);
 	

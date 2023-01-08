@@ -14,10 +14,13 @@ const userSchema = mongoose.Schema({
 	authType: {
 		type: String,
 		required: true,
-		enum: [authMethod.EMAIL, authMethod.GOOGLE]
+		enum: [authMethod.EMAIL, authMethod.GOOGLE, authMethod.FACEBOOK]
 	},
 	googleId: {
 		type: String
+	},
+	facebookId: {
+	  	type: String
 	},
 	status: {
 		type: String,
