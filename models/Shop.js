@@ -17,18 +17,18 @@ const shopSchema = new Schema({
 		type: addressSchema,
 		required: true,
 	},
-	openingHours: [{
-		type: openingHoursSchema
-	}],
-	flavors: [{
-		type: flavorSchema
-	}],
-	employees: [{
-		type: employeeSchema
-	}],
-	reviews: [{
-		type: reviewSchema
-	}],
+	openingHours: {
+		type: [openingHoursSchema]
+	},
+	flavors: {
+		type: [flavorSchema]
+	},
+	employees: {
+		type: [employeeSchema]
+	},
+	reviews: {
+		type: [reviewSchema]
+	},
 	rating: {
 		type: Number
 	},

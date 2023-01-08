@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 const validator = require('validator');
 const sendResponse = require('../../utils/sendResponse.js');
 const sendConfirmationEmail = require('../../utils/sendConfirmationEmail');
-const { roles, userStatus } = require('../../config/constants');
+const { roles, userStatus, authMethod } = require('../../config/constants');
 
 const userRegister = async (req, res) => {
 	try {
@@ -30,13 +30,14 @@ const userRegister = async (req, res) => {
 		const salt = await bcrypt.genSalt(10);
 		const hashedPassword = await bcrypt.hash(req_password, salt);
 
-		const token = jwt.sign({email: req_email}, process.env.TOKEN_SECRET);
+		const token = jwt.sign({ email: req_email }, process.env.TOKEN_SECRET);
 
 		const newUser = new User({
 			email: req_email,
 			password: hashedPassword,
 			roles: [roles.DEFAULT],
-			confirmationCode: token
+			confirmationCode: token,
+			authType: authMethod.EMAIL
 		});
 
 		await newUser.save();
@@ -59,6 +60,10 @@ const userLogin = async (req, res) => {
 
 		const user = await User.findOne({ email: req_email });
 
+		if (user.authType !== authMethod.EMAIL) {
+			return res.status(400).json(sendResponse(false, 'This account can only be logged into with email'));
+		}
+
 		if (!user || !(await bcrypt.compare(req_password, user.password))) {
 			return res.status(400).json(sendResponse(false, 'Invalid credentials'));
 		}
@@ -71,8 +76,8 @@ const userLogin = async (req, res) => {
 			user._id.toString(),
 			process.env.TOKEN_SECRET
 		);
-		
-		res.status(200).json(sendResponse(true, 'Login Successfully', { token: token } ));
+
+		res.status(200).json(sendResponse(true, 'Login Successfully', { token: token }));
 	} catch (e) {
 		res.json(sendResponse(false, e));
 	}
@@ -99,4 +104,17 @@ const userVerify = async (req, res) => {
 	res.status(200).json(sendResponse(true, 'Email verified'));
 }
 
-module.exports = { userRegister, userLogin, userVerify };
+const passportLogin = (req, res) => {
+	if (!req?.user?.id) { 
+		res.redirect(`${process.env.WEB_URL}/login/failed`);
+	}
+
+	const token = jwt.sign(
+		req.user.id.toString(),
+		process.env.TOKEN_SECRET
+	);
+	
+	res.redirect(`${process.env.WEB_URL}/login/success/${token}`);
+}
+
+module.exports = { userRegister, userLogin, userVerify, passportLogin };

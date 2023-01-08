@@ -15,8 +15,14 @@ const allowedOrigins = [
   "https://ice-cream-places-web.vercel.app",
 ];
 
+const authMethod = {
+  EMAIL: 'email', 
+  GOOGLE: 'google'
+}
+
 module.exports = {
   roles,
   allowedOrigins,
   userStatus,
+  authMethod,
 };

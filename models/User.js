@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const userShopSchema = require('./subdocuments/userShopSchema');
-const { roles, userStatus } = require('../config/constants');
+const { roles, userStatus, authMethod } = require('../config/constants');
 
 const userSchema = mongoose.Schema({
 	email: {
@@ -9,9 +9,15 @@ const userSchema = mongoose.Schema({
 		unique: true
 	},
 	password: {
+		type: String
+	},
+	authType: {
 		type: String,
 		required: true,
-		minlength: 5,
+		enum: [authMethod.EMAIL, authMethod.GOOGLE]
+	},
+	googleId: {
+		type: String
 	},
 	status: {
 		type: String,
@@ -19,20 +25,19 @@ const userSchema = mongoose.Schema({
 		default: userStatus.PENDING
 	},
 	confirmationCode: {
-		type: String,
-		unique: true
+		type: String
 	},
-	roles: [{
-		type: String,
+	roles: {
+		type: [String],
 		default: [roles.DEFAULT],
 		enum: [roles.DEFAULT, roles.ADMIN, roles.OWNER, roles.EMPLOYEE]
-	}],
-	shops: [{
-		type: userShopSchema
-	}],
-	favoriteFlavors: [{
-		type: String
-	}]
+	},
+	shops: {
+		type: [userShopSchema]
+	},
+	favoriteFlavors: {
+		type: [String]
+	}
 },
 	{
 		timestamps: true,
