@@ -34,6 +34,9 @@ Production:
 - [nodemailer](https://github.com/nodemailer/nodemailer) - Used for sending email on application behalf
 - [validator](https://github.com/validatorjs/validator.js/) - A library of string validators and sanitizers
 - [winston](https://github.com/winstonjs/winston) - Universal logging library
+- [passport](https://github.com/jaredhanson/passport) - Authentication middleware
+- [passport-facebook](https://github.com/jaredhanson/passport-facebook) - Passport strategy for authenticating with Facebook using OAuth 2.0
+- [passport-google-oauth20](https://github.com/jaredhanson/passport-google-oauth2) - Passport strategy for authenticating with Google using OAuth 2.0
 
 Development:
 - [jest](https://github.com/facebook/jest) - Javascript testing framework
@@ -50,6 +53,10 @@ Following information should be stored in **.env** file:
 - TEST_DB_CONNECTION - MongoDB test database connection string
 - USER - email address used by app to send verification email
 - PASS - email password
+- GOOGLE_CLIENT_ID - client id issued by google
+- GOOGLE_CLIENT_SECRET - client secret issued by google
+- FACEBOOK_CLIENT_ID - client id issued by facebook
+- FACEBOOK_CLIENT_SECRET - client secret issued by google
 
 Notes
 - Application uses gmail as its service so in order to allow confirmation emails to be send properly you have to use gmail account
@@ -64,4 +71,8 @@ DB_CONNECTION=mongodb://localhost:27017/db-name
 TEST_DB_CONNECTION=mongodb://localhost:27017/db-name-test
 USER=sample-email-address@gmail.com
 PASS=sample-password
+GOOGLE_CLIENT_ID=sample-client-id
+GOOGLE_CLIENT_SECRET=GOCSPX-sample-client-secret
+FACEBOOK_CLIENT_ID=sample-client-id
+FACEBOOK_CLIENT_SECRET=sample-client-secret
 ```
