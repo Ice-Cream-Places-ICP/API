@@ -14,6 +14,8 @@ const addReview = require('../controllers/shopFunctions/addReview');
 const deleteReview = require('../controllers/shopFunctions/deleteReview');
 const updateReview = require('../controllers/shopFunctions/updateReview');
 const sendInvitation = require('../controllers/employeeFunctions/sendInvitation');
+const deleteEmployee = require('../controllers/employeeFunctions/deleteEmployee');
+const updateEmployee = require('../controllers/employeeFunctions/updateEmployee');
 
 router.get('/', getAllShops);
 router.get('/:id', getShopById);
@@ -68,6 +70,18 @@ router.post(
     '/:id/employees',
     verifyRoles(roles.OWNER), 
     sendInvitation
+)
+
+router.patch(
+    '/:id/employees',
+    verifyRoles(roles.OWNER),
+    updateEmployee
+)
+
+router.delete(
+    '/:id/employees/:email',
+    verifyRoles(roles.OWNER),
+    deleteEmployee
 )
 
 module.exports = router;
