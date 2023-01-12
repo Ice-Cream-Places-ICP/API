@@ -8,7 +8,7 @@ const { notificationType, employeeStatus, roles } = require('../../config/consta
 
 const deleteEmployee = async (req, res) => {
     let {
-        id, 
+        id,
         email,
     } = req.params;
 
@@ -16,17 +16,17 @@ const deleteEmployee = async (req, res) => {
         return res.status(400).json(sendResponse(false, 'Invalid invitation id'));
     }
 
-    const shop = await Shop.findById(notification.shop.id).exec();
+    const shop = await Shop.findById(id).exec();
     if (!shop) {
         return res.status(400).json(sendResponse(false, 'Shop not found'));
     }
 
-    if (!isAdmin(req.user) && 
+    if (!isAdmin(req.user) &&
         getUserJobPosition(req.user.email, shop.employees) !== roles.OWNER) {
         return res.status(400).json(sendResponse(false, 'Access denied'));
     }
 
-    const user = await User.find({ email }).exec();
+    const user = await User.findOne({ email }).exec();
     if (!user) {
         return res.status(400).json(sendResponse(false, 'User not found'));
     }
@@ -36,18 +36,21 @@ const deleteEmployee = async (req, res) => {
         return res.status(400).json(sendResponse(false, 'Employee not found'));
     }
 
-    if (employee.jobPosition === roles.OWNER) {
+    if (employee.jobPosition === roles.OWNER && employee.status === employeeStatus.ACTIVE) {
         return res.status(400).json(sendResponse(false, `Owner cannot be removed from shop`));
     }
 
     if (employee.status !== employeeStatus.ACTIVE) {
-        const notificationPosition = indexOf(user.notifications.find(n => n.shop.id === shop.id && notificationType.SHOP_INVITATION));
-        if (notificationPosition > -1) {
-            user.notifications.splice(notificationPosition, 1);
+        const notification = user?.notifications?.find(n => n.shop.id === shop.id && n.type === notificationType.SHOP_INVITATION)
+        if (notification) {
+            const notificationPosition = user.notifications.indexOf(notification);
+            if (notificationPosition > -1) {
+                user.notifications.splice(notificationPosition, 1);
+            }
         }
     }
 
-    const employeePosition = indexOf(employee);
+    const employeePosition = shop.employees.indexOf(employee);
     shop.employees.splice(employeePosition, 1);
 
     await user.save();

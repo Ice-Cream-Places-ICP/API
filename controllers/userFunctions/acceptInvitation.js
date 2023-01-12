@@ -1,7 +1,7 @@
 const Shop = require('../../models/Shop');
 const mongoose = require('mongoose');
 const sendResponse = require('../../utils/sendResponse');
-const { notificationType, employeeStatus } = require('../../config/constants');
+const { employeeStatus } = require('../../config/constants');
 
 const acceptInvitation = async (req, res) => {
     let id = req.params.id;
@@ -10,7 +10,7 @@ const acceptInvitation = async (req, res) => {
         return res.status(400).json(sendResponse(false, 'Invalid invitation id'));
     }
 
-    const notification = req.user.notifications.find(notification => notification.id === id && notification.type === notificationType.SHOP_INVITATION)
+    const notification = req.user.notifications.find(notification => notification.id === id)
     if (!notification) {
         return res.status(400).json(sendResponse(false, 'Invitation not found'));
     }
@@ -28,6 +28,9 @@ const acceptInvitation = async (req, res) => {
         jobPosition: notification.shop.jobPosition
     }
     req.user.shops.push(userShop);
+
+    const notificationPosition = req.user.notifications.indexOf(notification);
+    req.user.notifications.splice(notificationPosition, 1); 
 
     await req.user.save();
     await shop.save();

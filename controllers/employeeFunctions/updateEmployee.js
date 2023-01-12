@@ -51,26 +51,28 @@ const updateEmployee = async (req, res) => {
         return res.status(400).json(sendResponse(false, `Owner position cannot be modified by other employee`));
     }
 
-    const newNotification = {
-        shop: {
-            id: shop.id,
-            name: shop.name,
-            jobPosition: jobPosition
-        },
-        type: notificationType.SHOP_INVITATION
+    if (employee.status !== employeeStatus.ACTIVE) {
+        const notification = user.notifications.find(n => n.shop.id === shop.id && notificationType.SHOP_INVITATION);
+        if (!notification) {
+            const newNotification = {
+                shop: {
+                    id: shop.id,
+                    name: shop.name,
+                    jobPosition: jobPosition
+                },
+                type: notificationType.SHOP_INVITATION
+            }
+            user.notifications.push(newNotification);
+        } else {
+            notification.shop.jobPosition = jobPosition;
+        }
     }
-    user.notifications.push(newNotification);
 
-    const newEmployee = {
-        email: email,
-        jobPosition: jobPosition,
-        status: employeeStatus.PENDING
-    }
-    shop.employees.push(newEmployee);
+    employee.jobPosition = jobPosition;
 
     await user.save();
     await shop.save();
-    res.status(200).json(sendResponse(true, `User with email '${email}' was invited to shop '${shop.name}`));
+    res.status(200).json(sendResponse(true, `User with email '${email}' was promoted to '${jobPosition}`));
 }
 
 module.exports = updateEmployee;
