@@ -5,6 +5,10 @@ const {
 	userVerify,
 	passportLogin,
 } = require('../controllers/authFunctions/authFunctions.js');
+const {
+	requestPasswordReset,
+	resetPassword
+} = require('../controllers/authFunctions/resetPassword');
 const loginErrorRedirect = require('../middleware/loginErrorRedirect');
 const passport = require('passport');
 
@@ -39,5 +43,15 @@ router.get('/facebook/redirect',
 	loginErrorRedirect,
 	passportLogin
 );
+
+router.post(
+	'/reset-password',
+	requestPasswordReset
+)
+
+router.post(
+	'/reset-password/:code',
+	resetPassword
+)
 
 module.exports = router;

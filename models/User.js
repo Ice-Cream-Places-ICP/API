@@ -31,6 +31,9 @@ const userSchema = mongoose.Schema({
 	confirmationCode: {
 		type: String
 	},
+	passwordResetCode: {
+		type: String
+	},
 	roles: {
 		type: [String],
 		default: [roles.DEFAULT],
