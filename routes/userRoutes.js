@@ -7,6 +7,7 @@ const getAllUsers = require('../controllers/userFunctions/getAllUsers');
 const verifyRoles = require('../middleware/verifyRoles');
 const acceptInvitation = require('../controllers/userFunctions/acceptInvitation');
 const declineInvitation = require('../controllers/userFunctions/declineInvitation');
+const toggleFavoriteShop = require('../controllers/userFunctions/toggleFavoriteShop');
 const { roles } = require('../config/constants');
 
 router.use(verifyToken);
@@ -38,6 +39,12 @@ router.post(
     '/shop-invitations/:id/decline',
     verifyRoles(roles.DEFAULT),
     declineInvitation
+)
+
+router.post(
+    '/favorite-shops/:shopId',
+    verifyRoles(roles.DEFAULT),
+    toggleFavoriteShop
 )
 
 module.exports = router;
