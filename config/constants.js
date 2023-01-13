@@ -32,6 +32,11 @@ const employeeStatus = {
   REJECT: 'reject'
 }
 
+const shopFieldsToNotifyChange = [
+  'openingHours',
+  'flavors'
+]
+
 module.exports = {
   roles,
   allowedOrigins,
@@ -39,4 +44,5 @@ module.exports = {
   authMethod,
   notificationType,
   employeeStatus,
+  shopFieldsToNotifyChange,
 };
