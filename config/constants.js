@@ -21,9 +21,22 @@ const authMethod = {
   FACEBOOK: 'facebook'
 }
 
+const notificationType = {
+  SHOP_INVITATION: 'shopInvitation',
+  SHOP_UPDATE: 'shopUpdate'
+}
+
+const employeeStatus = {
+  ACTIVE: 'active',
+  PENDING: 'pending',
+  REJECT: 'reject'
+}
+
 module.exports = {
   roles,
   allowedOrigins,
   userStatus,
   authMethod,
+  notificationType,
+  employeeStatus,
 };

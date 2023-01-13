@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { employeeStatus } = require('../../config/constants');
 const Shop = require('../../models/Shop');
 const sendResponse = require('../../utils/sendResponse');
 
@@ -18,8 +19,8 @@ const addReview = async (req, res) => {
         rate,
         content
     } = req.body;
-
-    if (shop.employees.find(e => e.email === req.user.email)) {
+    
+    if (shop.employees.find(e => e.email === req.user.email && e.status === employeeStatus.ACTIVE)) {
         return res.status(400).json(sendResponse(false, 'You cannot review shop that you\'re associated with'));
     }
 

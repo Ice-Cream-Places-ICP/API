@@ -6,7 +6,7 @@ const employeeSchema = require('./subdocuments/employeeSchema');
 const openingHoursSchema = require('./subdocuments/openingHours');
 const reviewSchema = require('./subdocuments/reviewSchema');
 const openingHoursOverflow = require('../utils/openingHoursOverflow');
-const { roles } = require('../config/constants');
+const { roles, employeeStatus } = require('../config/constants');
 
 const shopSchema = new Schema({
 	name: {
@@ -50,55 +50,59 @@ shopSchema.pre('save', async function () {
 	}
 
 	let ratings = []
-    this.reviews.forEach(r => ratings.push(r.rate));
+	this.reviews.forEach(r => ratings.push(r.rate));
 	const ratingsSum = ratings.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-    this.rating = !isNaN(ratingsSum / ratings.length) ? (ratingsSum / ratings.length) : 0;
+	this.rating = !isNaN(ratingsSum / ratings.length) ? (ratingsSum / ratings.length) : 0;
 })
 
 shopSchema.post('save', async function (doc) {
 	if (doc.removedAt !== undefined) {
 		doc.employees.forEach(async employee => {
-			let user = await doc.model('User').findOne({ email: employee.email }).exec();
-			let userShops = user.shops;
-			let userRoles = user.roles;
+			if (employee.status === employeeStatus.ACTIVE) {
+				let user = await doc.model('User').findOne({ email: employee.email }).exec();
+				let userShops = user.shops;
+				let userRoles = user.roles;
 
-			let userShop = userShops.find(s => s.id === doc._id.toString());
-			userShops.splice(user.shops.indexOf(userShop), 1);
+				let userShop = userShops.find(s => s.id === doc._id.toString());
+				userShops.splice(user.shops.indexOf(userShop), 1);
 
-			let updatedUserRoles = new Set([roles.DEFAULT]);
-			if (userRoles.includes(roles.ADMIN)) {
-				updatedUserRoles.add(roles.ADMIN);
+				let updatedUserRoles = new Set([roles.DEFAULT]);
+				if (userRoles.includes(roles.ADMIN)) {
+					updatedUserRoles.add(roles.ADMIN);
+				}
+
+				userShops.forEach(shop => {
+					updatedUserRoles.add(shop.jobPosition);
+				});
+
+				updatedUserRoles = Array.from(updatedUserRoles);
+
+				user.roles = updatedUserRoles;
+				user.shops = userShops;
+				await user.save();
 			}
-
-			userShops.forEach(shop => {
-				updatedUserRoles.add(shop.jobPosition);
-			});
-
-			updatedUserRoles = Array.from(updatedUserRoles);
-
-			user.roles = updatedUserRoles;
-			user.shops = userShops;
-			await user.save();
 		});
 	}
 	else {
 		doc.employees.forEach(async employee => {
-			let user = await doc.model('User').findOne({ email: employee.email }).exec();
-			let userShops = user.shops;
-			let userRoles = user.roles;
+			if (employee.status === employeeStatus.ACTIVE) {
+				let user = await doc.model('User').findOne({ email: employee.email, status: employeeStatus.ACTIVE }).exec();
+				let userShops = user.shops;
+				let userRoles = user.roles;
 
-			let userShop = userShops.find(s => s.id === doc._id.toString());
-			if (!userShops.includes(userShop)) {
-				userShops.push({ id: doc._id, jobPosition: employee.jobPosition });
+				let userShop = userShops.find(s => s.id === doc._id.toString());
+				if (!userShops.includes(userShop)) {
+					userShops.push({ id: doc._id, jobPosition: employee.jobPosition });
+				}
+
+				if (!userRoles.includes(employee.jobPosition)) {
+					userRoles.push(employee.jobPosition);
+				}
+
+				user.roles = userRoles;
+				user.shops = userShops;
+				await user.save();
 			}
-
-			if (!userRoles.includes(employee.jobPosition)) {
-				userRoles.push(employee.jobPosition);
-			}
-
-			user.roles = userRoles;
-			user.shops = userShops;
-			await user.save();
 		})
 	}
 });

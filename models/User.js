@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const userShopSchema = require('./subdocuments/userShopSchema');
+const notificationSchema = require('./subdocuments/notificationSchema');
 const { roles, userStatus, authMethod } = require('../config/constants');
 
 const userSchema = mongoose.Schema({
@@ -37,6 +38,9 @@ const userSchema = mongoose.Schema({
 	},
 	shops: {
 		type: [userShopSchema]
+	},
+	notifications: {
+		type: [notificationSchema]
 	},
 	favoriteFlavors: {
 		type: [String]
