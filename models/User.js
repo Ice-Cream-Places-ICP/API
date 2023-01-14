@@ -42,7 +42,7 @@ const userSchema = mongoose.Schema({
 	notifications: {
 		type: [notificationSchema]
 	},
-	favoriteFlavors: {
+	favoriteShops: {
 		type: [String]
 	}
 },
@@ -51,6 +51,10 @@ const userSchema = mongoose.Schema({
 	});
 
 userSchema.post('remove', async function (doc) {
+	updateShopsOnDelete(doc);
+})
+
+const updateShopsOnDelete = async (doc) => {
 	const shops = await doc.model('Shop').find({ "employees.email": doc.email });
 
 	shops.forEach(shop => {
@@ -63,6 +67,6 @@ userSchema.post('remove', async function (doc) {
 	})
 
 	await shops.save();
-})
+} 
 
 module.exports = mongoose.model('User', userSchema);

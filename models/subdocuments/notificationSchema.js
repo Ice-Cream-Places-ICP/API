@@ -15,6 +15,9 @@ const notificationSchema = new Schema({
                 type: String,
                 enum: [roles.EMPLOYEE, roles.OWNER]
             },
+            modifiedPath: {
+                type: String,
+            },
             _id: false
         },
     },
