@@ -14,7 +14,8 @@ const employeeSchema = new Schema({
     },
     status: {
         type: String,
-        enum: [employeeStatus.ACTIVE, employeeStatus.PENDING, employeeStatus.REJECT]
+        enum: [employeeStatus.ACTIVE, employeeStatus.PENDING, employeeStatus.REJECT],
+        default: employeeStatus.PENDING
     }
 },
     {

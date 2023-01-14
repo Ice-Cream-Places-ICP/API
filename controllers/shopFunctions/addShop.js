@@ -2,7 +2,7 @@ const sendResponse = require('../../utils/sendResponse.js');
 const arePropertiesSame = require('../../utils/arePropertiesSame');
 const Shop = require('../../models/Shop');
 const User = require('../../models/User');
-const { roles } = require('../../config/constants');
+const { roles, employeeStatus } = require('../../config/constants');
 const hasDuplicates = require('../../utils/hasDuplicates.js');
 
 const addShop = async (req, res) => {
@@ -47,7 +47,7 @@ const addShop = async (req, res) => {
         const creator = req.user.id;
         if (!req.user.roles.includes(roles.ADMIN) &&
             !employees.includes(employees.find(e => e.email === req.user.email))) {
-            employees.push({ email: req.user.email, jobPosition: roles.OWNER });
+            employees.push({ email: req.user.email, jobPosition: roles.OWNER, status: employeeStatus.ACTIVE });
         }
 
         const shop = new Shop({
