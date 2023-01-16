@@ -3,6 +3,21 @@
 
 name: Node.js CI
 
+env:
+  PORT: '${{secrets.PORT}}'
+  API_URL: '${{secrets.API_URL}}'
+  WEB_URL: '${{secrets.WEB_URL}}'
+  WEB_PORT: '${{secrets.WEB_PORT}}'
+  TOKEN_SECRET: '${{secrets.TOKEN_SECRET}}'
+  DB_CONNECTION: '${{secrets.DB_CONNECTION}}'
+  TEST_DB_CONNECTION: '${{secrets.TEST_DB_CONNECTION}}'
+  USER: '${{secrets.USER}}'
+  PASS: '${{secrets.PASS}}'
+  GOOGLE_CLIENT_ID: '${{secrets.GOOGLE_CLIENT_ID}}'
+  GOOGLE_CLIENT_SECRET: '${{secrets.GOOGLE_CLIENT_SECRET}}'
+  FACEBOOK_CLIENT_ID: '${{secrets.FACEBOOK_CLIENT_ID}}'
+  FACEBOOK_CLIENT_SECRET: '${{secrets.FACEBOOK_CLIENT_SECRET}}'
+  
 on:
   push:
     branches: [ "old-dev-refactor" ]
