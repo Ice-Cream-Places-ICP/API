@@ -11,7 +11,6 @@ const userRoutes = require("./routes/userRoutes.js");
 const mailRoutes = require("./routes/mailRoutes");
 const app = express();
 
-//MIDDLEWARE
 app.use(requestLogger);
 app.use(express.json());
 app.use(cors(corsOptions));
@@ -20,7 +19,5 @@ app.use("/shops", shopRoutes);
 app.use("/users", userRoutes);
 app.use("/mail", mailRoutes);
 app.use(errorHandler);
-
-// test for CI
 
 module.exports = app;
