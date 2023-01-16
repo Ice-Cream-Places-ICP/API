@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const User = require('../../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const { roles, userStatus } = require('../../config/constants');
+const { roles, userStatus, authMethod } = require('../../config/constants');
 
 const userLoginTest = () => describe('POST /auth/login', () => {
     const validPassword = 'ABCdef1@';
@@ -23,7 +23,8 @@ const userLoginTest = () => describe('POST /auth/login', () => {
             email: validEmail,
             password: hashedPassword,
             roles: roles.DEFAULT,
-            status: userStatus.ACTIVE
+            status: userStatus.ACTIVE,
+            authType: authMethod.EMAIL
         });
 
         await user.save();
@@ -34,10 +35,6 @@ const userLoginTest = () => describe('POST /auth/login', () => {
         if (mongoose.connection.readyState === 0) {
             mongoose.connect(process.env.TEST_DB_CONNECTION);
         }
-    })
-
-    afterEach((done) => {
-        done();
     })
 
     afterAll(async () => {

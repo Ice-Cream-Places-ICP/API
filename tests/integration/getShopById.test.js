@@ -59,10 +59,6 @@ const getShopByIdTest = () => describe('GET /shops/:id', () => {
         }
     })
 
-    afterEach((done) => {
-        done();
-    })
-
     afterAll(async () => {
         await mongoose.connection.dropDatabase();
         await mongoose.connection.close();

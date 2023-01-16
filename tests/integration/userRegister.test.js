@@ -18,10 +18,6 @@ const userRegisterTest = () => describe('POST /auth/register', () => {
         await mongoose.connection.dropDatabase();
     })
 
-    afterEach((done) => {
-        done();
-    })
-
     afterAll(async () => {
         await mongoose.connection.dropDatabase();
         await mongoose.connection.close();

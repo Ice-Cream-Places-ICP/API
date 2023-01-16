@@ -1,6 +1,6 @@
-const userLoginTest = require('./unit/userLogin.test');
-const userRegisterTest = require('./unit/userRegister.test');
-const getShopByIdTest = require('./unit/getShopById.test');
+const userLoginTest = require('./integration/userLogin.test');
+const userRegisterTest = require('./integration/userRegister.test');
+const getShopByIdTest = require('./integration/getShopById.test');
 
 describe('sequentially run tests', () => {
     userLoginTest();
