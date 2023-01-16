@@ -24,7 +24,7 @@ passport.use(
 
             const duplicate = await User.findOne({ email: email }).exec();
             if (duplicate) {
-                const err = new Error('User already exists');
+                const err = new Error("This account can't be signed in with Google");
                 return done(err);
             }
 
@@ -70,7 +70,7 @@ passport.use(
 
             const duplicate = await User.findOne({ email: email }).exec();
             if (duplicate) {
-                const err = new Error('User already exists');
+                const err = new Error("This account can't be signed in with Facebook");
                 return done(err);
             }
 
