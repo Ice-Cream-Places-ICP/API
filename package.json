@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node index.js",
-    "test": "npx jest sequentialRunner"
+    "test": "npx jest sequentialRunner --detectOpenHandles"
   },
   "repository": {
     "type": "git",
