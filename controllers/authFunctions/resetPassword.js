@@ -1,6 +1,7 @@
 const User = require('../../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const { authMethod } = require('../../config/constants');
 const sendResponse = require('../../utils/sendResponse');
 const sendPasswordResetEmail = require('../../utils/sendPasswordResetEmail');
 
@@ -12,6 +13,10 @@ const requestPasswordReset = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) {
         return res.status(400).json(sendResponse(false, 'User not found'));
+    }
+
+    if (user?.authType !== authMethod.EMAIL) {
+        return res.status(400).json(sendResponse(false, `Account with email address '${email}' uses other authentication method than email`));
     }
 
     const passwordResetCode = jwt.sign({ email }, process.env.TOKEN_SECRET);
