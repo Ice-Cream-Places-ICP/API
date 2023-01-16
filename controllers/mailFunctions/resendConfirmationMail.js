@@ -1,6 +1,6 @@
 const User = require("../../models/User");
 const validator = require('validator');
-const { userStatus } = require('../../config/constants')
+const { userStatus, authMethod } = require('../../config/constants')
 const sendResponse = require('../../utils/sendResponse');
 const sendConfirmationEmail = require('../../utils/sendConfirmationEmail');
 
@@ -22,6 +22,10 @@ const resendConfirmationMail = async (req, res) => {
 
     if (user.status !== userStatus.PENDING) {
         return res.status(400).json(sendResponse(false, `Account with email address '${email}' was already verified`));
+    }
+
+    if (user?.authType !== authMethod.EMAIL) {
+        return res.status(400).json(sendResponse(false, `Account with email address '${email}' uses other authentication method than email`));
     }
 
     sendConfirmationEmail(email, user.confirmationCode);
