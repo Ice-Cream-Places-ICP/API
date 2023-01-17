@@ -20,17 +20,21 @@ const updateUser = async (req, res) => {
             return res.status(400).json(sendResponse(false, 'Invalid user id'));
         }
 
-        if (id !== req.user.id.toString()) {
-            if (!isAdmin(req.user) && id !== req.user.id.toString()) {
+        if (id !== req.user.id) {
+            if (!isAdmin(req.user)) {
                 return res.status(400).json(sendResponse(false, 'Access denied'));
             }
             else {
                 updatedUser = await User.findById(id).populate('shops.id').select('-password -createdAt -updatedAt -__v').exec();
+
+                if (!updatedUser) {
+                    return res.status(400).json(sendResponse(false, 'User not found'));
+                }
             }
         }
     }
 
-    if (hasDuplicates(favoriteFlavors)) {
+    if (favoriteFlavors?.length > 0 && hasDuplicates(favoriteFlavors)) {
         return res.status(400).json(sendResponse(false, `Flavors list cannot have duplicates`));
     }
 
@@ -45,7 +49,9 @@ const updateUser = async (req, res) => {
         if (!userStatusArr.includes(status)) {
             return res.status(400).json(sendResponse(false, `Status '${status}' is incorrect`));
         }
-        updatedUser.status = status;
+        if (status) {
+            updatedUser.status = status;
+        }
     }
     else {
         if (!areProportiesSame(updatedUser.status, status)) {
